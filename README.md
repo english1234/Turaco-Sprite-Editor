@@ -17,7 +17,7 @@ This port brings Turaco to modern Windows systems using SDL2, eliminating the ne
 ## Screenshot
 
 <p align="center">
-  <img src="images/turaco_main_interface.png" alt="Turaco Sprite Editor Interface" width="800">
+  <img src="Images/turaco_main_interface.png" alt="Turaco Sprite Editor Interface" width="800">
 </p>
 
 ## Original Turaco
