@@ -1,0 +1,20 @@
+
+for building Turaco, you'll need: 
+	DJGPP 2.8.1
+	Allegro 3.0 +WIP
+	DEGUI 1.25 Beta
+
+Special instructions for degui...
+A) make a directory for DEGUI, and unzip the distribution into it
+B) copy over "degui.mak" into the source directory in the degui distribution
+   from the txt directory of this distribution
+C) rename that "degui.mak" to "makefile", (backup the old makefile if you want)
+D) run the "makeall" batch file, to build degui
+E) copy the degui.h file into djgpp\include
+F) copy the libdegui.a file into djgpp\lib
+G) Now you can build Turaco!
+
+if you don't want to use degui, or if you have problems with it:
+A) change the two commented lines in the makefile to not use degui.
+B) build Turaco.
+

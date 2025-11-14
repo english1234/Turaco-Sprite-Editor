@@ -1,0 +1,415 @@
+This file will chronicle all the changes made to the "Turaco" project...
+
+New features for TURACO 1.2 (In English)
+- Re-wrote the bitmap editor routine - should work better now
+- Fix for Capcom games who didn't work correctly before
+
+10/07/99
+    added looping styles to animview.c
+
+10/05/99
+    misc files modified for the animate hooks.
+    F7 steps through animations
+    F8 turns on auto animate
+    added A and B buttons to the GUI for setting the range.
+    changed it to an [A] button (alt-a) to set it from the keyboard
+
+10/04/99
+    fileio.c, makefile - added NOFADE option
+    animate.[ch] - added
+    makefile - added in animate.* and also #define for disabling exit fade
+
+03/24/99
+    Released as Version 1.1.2
+    bug 10 fixed: (by ivan)
+	inidriv.c --\__ Ivan's fix for the capcom games installed 
+	gamedesc.h -/    (ie ghouls & ghosts).  Untested by me -- no romsets
+    life & misc other little stuff (jerry ;)
+	toolmenu.c - changed "Wrap" to "Roll" -- like a TV rolling...
+		   - added Conway's life to the menu
+	dlg.c - added mouse hide/show in F12 handler to minimize glitches
+    readme.txt - updated accordingly
+
+03/18/99
+    bug 10 found.
+
+03/17/99
+    life.c - added Conway's game of life.  (hit f-12 to step it)
+             (I thought it might be fun to try this out on the gfx. hehehe)
+
+03/07/99
+    Released as Version 1.1.1
+
+03/06/99
+    "To create, you must destroy" - Too Much Joy's "Theme Song"
+    bitmaped.c - Wrote the new sizing algo -- deleted the old one
+    bitmaped.c - Fixed mouse constrain -- was off by one on right & bottom 
+    bitmaped.c - Added new method for click x,y positioner
+    bitmaped.c - Added brute-force draw routine
+    sprtplte.c - changed the dotted blue box draw location +2 -> +4242
+
+03/05/99
+    bitmaped.c - Added MSG_SIZE_CHANGE message to the bitmap gui object
+    bitmaped.c - Used allegro's do_line() routine to generate the sizing tables.
+
+03/04/99
+    Updated my email to be jerry@absynth.com
+
+
+02/06/99
+    Released as Version 1.1
+    Gameboy Driver
+    Integrated Ivan's ApplyPatch() call... 
+    Updated section 8.4 of the readme file
+
+
+01/04/99
+    Released as Version 1.0.3
+
+01/02/99
+    "The Art of Noise is paranoid"
+    Fixed arrow key support for the bitmap display object.
+    re-enabled the text & map editors from menus & F-Keys
+    copied over the maped related files from AGE 0.6.3H
+
+01/01/99
+    Happy new year!
+    added F9/F10 to save/load bank as/from PCX
+    added PAGE-UP, PAGE-DOWN, and HOME shortcuts
+
+12/29/98 Jerry
+    "Fosters.  Austrailian for 'export'." 
+    added most of the functionality to gui\bmpdisp.c (no grid or snap)
+    added null cursor (clear cursor) to editmenu for the above 
+    Pcx load working using the above. 
+    added arrow key capture to bitmap display object
+    added the Home button to the PCX load screen (sets offsets to 0)
+    pulled another two adds out of the innermost loops of coding.c
+
+12/28/98 Jerry
+    added txt\deguibug.txt listing all of the bugs with degui
+    changed the exit text blurb
+    started work on gui\bmpdisp.c
+
+12/26/98 Jerry
+    "I am not arguing that with you." - Joe Vs. The Volcano
+    changed HILITE and LOLITE colors for the sprite palette
+    fixed a small bug where the sprite palette did not reset Mouse position
+    made the help/text viewer check in TXT\ first, before the current directory
+    added my_draw_dotted_rect cause the degui one sucks.
+    used the above rect function on the mouse position thingy
+    changed the resolution selector to be a button & popup menu, not mx buttons
+    bug 09 found. & hack installed to go around it. (see EDITMENU.C)
+
+    "Two slightly sampled electric guitars.." - Tubular Bells 2
+    Moved (16,16) resolution's for default bitmap into general.h
+    added a fade out for closing the screen
+    added cursor position in the sprite palette
+    added the edit button
+    removed the sprite palette popup (left it in sprite.c, #if 0'd out.)
+    added double-click handling for clicking in sprite palette (get)
+    added right double-click handling for clicking in sprite palette (replace)
+    uncommented code so alike-sized sprite banks don't clear the edit window
+    changed geometry for the currently selected position in the sprite palette
+
+12/24/98 Jerry
+    "I know he can GET the job, but can he DO the job?!" - Joe Vs. The Volcano
+    Added sprite and palette code to the pcx save routine 
+    Added an autofilename generator to suggest a filename for the image.
+    Added an autofilename generator to suggest a filename for C source
+    Added a key sponge in my_kyb to prohibit accidental exit of the program
+    Added the moouseover display for the sprite palette
+    Added a readme viewer for README.TXT, and WHATSNEW.TXT in help.c
+    Squashed a bug in destroy_dir_list which caused random crashes for me
+    fixed some stupidness in gui\drivsel.c
+    inflate.[ch] removed from the project -- not quite what we need
+
+12/23/98 Jerry
+    Added the pcx save dialog boxes, but I still need to add the backing code
+
+12/21/98 Jerry
+    put in the 0..255 / 0..64 switch, 
+      but the editor looked horrid, so i deleted it.
+    fixed the compiler warning from the font structure (which worked fine)
+
+12/20/98 Jerry
+    Added the driver dir to the file selector progress box (& fixed)
+    Fixed a malloc bug with the file selector (pointer not NULL'ed)
+    command line driver subdir search
+
+12/19/98 Jerry
+    Replaced my horrid font with a better one.
+    Updated the readme.txt for the drivers
+    added updatesliders into the image palette grabber routine
+    pulled two sub's and a shift out into an array reference in coding.c
+
+12/17/98 Jerry
+    Fixed the INI FILE DAMMIT, and the single plane fix was not necessary.
+    It's official.  I'm on crack.  i had a number wrong in yoffsets (36!=32).
+    fixed the bitmap editor to display non-square items' grid properly
+    fixed the sprite editor's display when the number of sprites is less 
+     than the width of the display
+    save current graphics bank as C source file
+    modified allegro's font and integrated it into the source (font.c)
+    added the new font & preference panel to change it
+
+12/16/98 Jerry
+    made the driver selector behave better when [esc] is hit (mod 25)
+    copied the error messages into the readme file 
+    re-wrote and sped up(?) the encode/decode routines in coding.c
+
+
+12/15/98 Jerry
+    Released as Version 1.0.2
+    Fixed a small typo in DRIVER.TXT
+    added in the single plane hack in config.c 
+    added in the hack itself into coding.c (encode & decode)
+    updated the readme file
+    image loader for the palette editor (reads the palette)
+
+12/13/98 Jerry
+    added user settings screen & checkbox for drv dir & rompath
+    updatd the readme file to explain the settings screen.
+    added in the get/set_config_on_off macros in util.h for config.c
+    created DRIVER.TXT, a well commented driver file.
+
+12/12/98 Jerry
+    added functionality for driver subdirectories in the file selector
+    added display of driver directory in the selector itself
+    added the driver_subdirectory entry in turaco.ini
+    updated the readme for the above
+    added in the section about the TURACO.INI file in the readme.
+
+12/11/98 Jerry
+    modified the driver selector to display number of colors per bank thingy
+    Integrated in the mame beta driver files (837 - 30 0 plane + oldones)
+    (then broke it)
+    have the command line driver loader check expdriv/ first
+    added a keyhit to skip scanning of files for the loader. (hit any key)
+    added inflate[ch] from MAME -- it does not do .zip listings though. :(
+    created txt\drivers.bat to sort mame drivers automagically
+
+
+12/10/98 Jerry
+    Released as Version 1.0.1
+    Added the sprite number into the sprite select popup menu
+    changed zip names for new versions
+    re-zipped drivers to make compression/decompression more sane.
+    created iload.[ch]
+    bug 07 found & fixed - Blizzard noticed it.
+    bug 08 found... Ivan?
+
+
+12/8/98 Jerry
+    Version 1.0  (re-release with drivers and executble zips seperate)
+    ported over .ini drivers from age 0.6.3 (had it generate .ini files)
+    Seperated the drivers into a seperate .zip file
+    added expdriv into the driver listing for the file selector
+    - this is good for experimental drivers, so you don't have to mix them
+      together with the known working drivers.
+
+12/5/98 Jerry
+    Version 1.0 
+
+12/2/98 Jerry
+    Version 1.0  (driver files may need tweaking...) (dated 12/5/98)
+    swapped the sprite palette buttons (up/down - plus/minus)
+    Updated the readme file again.  pulled the patch command line info
+    those are in txt\readme.pat
+    fixed zaxxon & a few pac games
+    html list still said "AGE".  oops.
+    fixed a line on the edit screen - off by a few pixels
+    proofread readme.txt
+    added some comments here and there.
+
+12/1/98 Ivan
+    fixed bug06 - palette save bug
+    If a game name is too long then it is truncated and ... is added
+    Fixed some drivers so that half of there sprites are not lost
+    Modified many INI files so that they now load
+    Added better colour palettes to many drivers
+    Created the missing galaga driver (midway and namco) inc. colours
+
+11/29/98 Jerry
+    version 0.09   (Release Candidate 1)
+    Changed the method of current_sprite stuff in bank change (old commented)
+    added unload_driver() to clean up some assorted mess
+    created the new readme.txt file (modified the hell out of an AGE readme)
+    fixed a few undefined references to pointers in the gui functions...
+    updated and streamlined the CFLAGS in the makefile
+    fixed the distrib section of the makefile
+    fixed bug05
+
+11/25/98 Jerry
+    version 0.08 - sent back to Ivan
+    Integrated Ivan's code (His code was from the 11/18 source)
+    tweaked ivan's changes...
+    fixed an itty bitty bug in the palette code.
+    added more busy()'s and not_busy()'s to the load/save code where applicable
+    moved the sprite sel routine out of MSG_CLICK in sprtplte.c into sprite.c
+    removed calls to recompute_sprite_geometrics, as it did nothing anymore.
+    moved the file selector into gui\drivsel.c 
+    fixed a bug where a "cancel" click in the selector crashes the program.
+    found bug05 (which progressively got worse)
+
+11/25/98 Ivan
+    Fixed Bugs 3 + 4 in bugs.txt
+
+11/22/98 Jerry
+    version 0.07 - sent back to Ivan
+    created list.c 
+    added functions for: -list -listhtml -listfull -listroms
+    recessed the "actual size" sprite display so it doesn't look like a button
+
+11/21/98 Jerry
+    added the beginnings of the -list* command line options.
+
+11/20/98 Jerry
+    fixed bug04 slight color confusion in coding.c.  tweaked.  fixed.
+    added filename display to the loader progress box
+    added some visual sunken boxes for text to sit in for the main display
+    moved around some gui controls on the main display
+    updated the command line parser to make way for more commands
+
+11/18/98 Jerry
+    version 0.06 - sent back to Ivan
+    added command line driver specification ie: "turaco.exe pacman"
+    pulled out user/last_selected driver stuff - not necessary anymore
+    fixed the mouse glitch when scanning the drivers, oops.
+    created the palette editor
+    changed the 3d-box function to work as its proto'd to.
+    added position_dialog function
+    removed redraw_all function
+    started working on an Atari VCS/2600 driver using Space Invaders to test.
+    (drivers\spaceinv.ini)
+    found bug04
+
+11/17/98 Jerry
+    version 0.05 - sent back to Ivan
+    re-organized edit mode functions out into editmode.[ch]
+    fixed bug 2: made sure all data structures were cleaned out, and initted.
+    also cleaned up screen_text in dlg.c & palette number position %2d -> %d
+
+11/12/98 Jerry
+    integrated ivan's changes 
+    borrowed the draw routine from degui's progress bar.  looks pretty now. :)
+    updated the distrib section of the makefile
+
+11/12/98 Ivan
+    added save and create new pallete functions
+
+11/11/98 Jerry
+    fileio.c  added file scan progress indicator (%d/%d)
+
+11/9/98 Jerry   
+    version 0.04 - sent back to Ivan
+    Integrated Ivan's changes.
+    Changed the #defines and made it easier to compile without degui 
+    -=- just make the 2 simple changes to the makefile.. -=-
+    updated main.c to handle display of usage/version better
+
+11/8/98 Ivan   
+    version 0.03
+    Added ability to save graphics set (including backing up originals)
+    Fixed bug01
+    Added functionality to write a patch file
+    Migrated ini drivers from AGE07
+    Added orientation stuff to loader
+    Replaced many occurances of get_config_argv as the argc max'ed out at 16
+
+11/8/98 Jerry
+    touched up the loader.  space & enter in scroller tabs to "OK"
+    pressing a key goes to that entry - displays properly
+    added BUSY_CURSOR and default mode set during load & revert
+    fixed [replace] bug - used to replace into bank 1 instead of current
+
+11/7/98 Jerry
+    created the new file loader dialog.  (rougly based on fsel.c)
+
+11/4/98 Jerry
+    version 0.02
+    Finished sprite palette gadget - menu to choose edit/replace
+    added highlight so you can see what the last edited function was
+    re-added save,revert,patch menu options & commented their stubs in fileio.c
+    added a variable, INI_Driver_path for revert to work properly
+    added "bugs.txt" and bug number 01.
+    added menu options and stubs for the palette edit functions in palette.c
+    added lotsa on-screen text (screen_text()) showing data about the stuff.
+    added "replace" button on the screen.
+
+11/3/98 Jerry
+    bitmaped grid is defaulted on.  also grid is GUI_FORE not highlight.
+    added edit->copy/paste sprite  (simple clipboard)
+    commented out all unimplemented menu functions
+
+11/2/98 Jerry
+    added maped.c and texted.c for completeness *simple stubs for now!*
+    changed the init code and error handling for the bitmaped gadget
+    moved around file menu functions into fileio.c
+    created help.c and moved menu functions into there...
+    added switch palette bank function for the file_load fcn and +/- to use
+    added text display of game name, bank number, palette number
+    < and > change palettes now...
+
+11/1/98 Jerry
+    integrated palette stuff - palette + & - functions & gui gadget debugged
+
+10/20/98 Jerry
+    added config.[ch] and basic ini configuration stuff
+    added (De)Init_Subsytem() calls to main.c
+    added resolution control to config.* & the ini file.
+
+10/20/98 Ivan
+    added palette loading
+
+10/19/98 Ivan
+    added ini file loader and rom loader
+
+10/12/98 Jerry
+    added some commenting, and the file build.txt
+
+10/01/98 Jerry
+    changed the flood fill cursor
+    added arrow keys, and alt-x,y,w,z commands to the bitmap editor
+    added alt-p and snap.c to dump out screenshots
+    added mouse capture into bitmaped.c
+
+9/29/98 Jerry
+    added button_dp2_proc() so button callbacks are smaller and simpler.
+
+9/27/98 Jerry
+    finished palette selection gadget.
+    renamed age.[ch] to dlg.[ch]
+    renamed "newage" to "turaco"
+
+9/24/98 Jerry
+    bitmap callback & paint modes done (paint, flood, eyedropper)
+    cheesy flood-fill and eyedropper cursors
+
+9/23/98 Jerry
+    changed the paradigm for the bitmaped and pallette tools to callbacks.
+
+9/21/98 Jerry
+    created the GUIpal palette display gadget
+
+9/20/98 Jerry
+    Started designing & working on the sprite palette
+
+9/19/98 Jerry
+    Finished bitmaped function & 3d gadget style (in util.c)
+    integrated in the old tools functions into toolmenu.c
+    fixed degui to work on my 486 -- compile in just the .c modules 
+    (attach makefile to the source distribution)
+
+9/8/98  Jerry
+    Added in Degui to make the UI prettier...
+    Added the AmigaDOS style mouse cursor and the cheesy busy pointer
+    Added in stubs for all menu calls; created tools.[ch]
+    Added the beginning of the keyboard shortcut ui gadget
+
+9/7/98  Jerry
+    version 0.01
+    Created the project, made the initial .c file & makefile
+    Switched the demo code from VGA 320x200 to ModeX 320x240
+    started design of the new organization
+    added the initial menus to the display

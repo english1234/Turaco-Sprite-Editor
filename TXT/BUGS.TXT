@@ -1,0 +1,55 @@
+
+Bug 01:  * FIXED *
+    write to bank 3 pacman, change to bank 4
+    - fixed by Ivan 0.03
+
+Bug 02:  * FIXED *
+    failed load of a driver leaves system in a bad state
+
+Bug 03:  * FIXED *
+    load a driver with 2 palettes - one 4 color, one > 4 color.
+    if 4 color is first, palette is screwed up when changing.
+
+Bug 04:  * FIXED *
+    encode() was not saving out the proper colors, so they got offset by 1
+    with each call to encode(), which happens on a bank change.
+
+Bug 05:  * FIXED *
+    start turaco with no command line args
+    load in pacman
+    load in commando
+    *crash* (not in fileio.c or drivsel.c!)
+    NOTE: this does NOT happen if you specify pacman on the command line
+    It was the fileselector.  Something odd with mallocing certain sizes.
+    Sound familiar? -ugh-
+
+Bug 06:  * FIXED *
+    Games with graphics banks that have different number of planes have 
+    problems saving the palette info as the index into the set of palettes 
+    for the current plane is used as a index in the ini file. This will 
+    overwrite palettes from a different plane. 
+    All palettes are now saved in order to avoid this problem.
+
+Bug 07:  * FIXED *
+    changes made to a sprite are not committed to the rom data internally
+    when the graphics are saved.  
+    load pacman, change gfx, save - changes not saved
+    change bank, change bank back, save - works
+    fixed for 1.0.1
+
+Bug 08:  * FIXED *
+    Application of patches doesn't work -- it is not implemented.  oops.
+    fixed for 1.1
+
+Bug 09: 
+    going to the preferences dialog and exiting, rotates the image 45 degrees
+    clockwise.  Odd, eh?
+    - temporary workaround added - before we run the dialog, we save the edit
+    image to a temporary buffer, then restore it when the dialog is closed.
+
+Bug 10:  * FIXED *
+    Ghouls & Ghosts won't load properly -- rom sizes are very large negative
+    numbers.  -- as it turns out, Ivan found that there's a flag in the 
+    high bit of the number (which causes the large negative numbers) meaning
+    to load the roms a certain way.  
+    fixed for 1.1.2

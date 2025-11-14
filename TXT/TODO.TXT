@@ -1,0 +1,44 @@
+
+To do for future versions:  (in no particular order.)
+--------------------------
+
+Gui Objects:
+
+->  bitmaped.c object:
+     re-write the draw, grid, and mouse placement routines to all
+     use the same method for determining pixel placement.
+     (so we can get rid of the 32x32+ hack in there now of resizing the grid)
+     ** DONE for 1.1.1 **
+
+->  bmpdisp.c object:
+     Grid snap & display(?)
+
+Functionality:
+
+->  text field for palettes
+
+->  map editor
+
+->  superbitmap editor
+
+->  fruit path editor
+
+->  port text editor 
+
+->  get everything working at multiple screen resolutions
+    - scale the gui gadgets and position appropriately
+
+->  scratchpad editor
+
+->  Gameboy driver (multigame driver)
+    - [file]->[load game]->[mame driver] (current)
+      [file]->[load game]->[multi driver] (new)
+    - brings up a list of multi-driver files: ie gameboy, 2600VCS, NES, etc
+    - new ini file format which uses a single gfxbank description, with
+      multiple SELECTABLE romsets
+
+->  Atari 2600/VCS driver  -- scrap!
+    - need a new menu option
+    - need a file selector
+    - need a filename / lookup table (time consuming!)
+

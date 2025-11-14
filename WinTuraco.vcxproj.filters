@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GUI\ANIMVIEW.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BITMAPED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BMPDISP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BUTTON.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\DRIVSEL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIPAL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\SPRTPLTE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\UTIL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MAPED\PACMAN.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\AGE_MAP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ANIMATE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\CODING.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\CONFIG.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\DLG.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\EDITMENU.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\EDITMODE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\FILEIO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\FONT.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\GAMEDESC.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\HELP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ILOAD.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\INIDRIV.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\LIFE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\LIST.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\WINTURACO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\MAPED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\PALETTE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\SNAP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\SPRITE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\TEXTED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\TOOLMENU.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ALLEGRO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="INCLUDE\ANIMATE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\ANIMVIEW.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\BITMAPED.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\BMPDISP.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\CODING.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\CONFIG.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\DRIVSEL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\EDITMENU.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\EDITMODE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\FILEIO.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\GAMEDESC.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\GENERAL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\GUIPAL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\HELP.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\ILOAD.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\INIDRIV.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\LIFE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\LIST.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\MAPED.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\PALETTE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\SNAP.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\SPRITE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\SPRTPLTE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\TEXTED.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\TOOLMENU.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\UTIL.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\ALLEGRO.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+  </ItemGroup>
+</Project>

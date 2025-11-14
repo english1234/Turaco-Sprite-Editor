@@ -1,0 +1,91 @@
+Jerry's Turaco short-term to-do list:
+
+    App Functionality
+	* map editor
+	  - use something similar to the pcx load dialog
+	  - base map data (enable/disable)   pacman map    GB graphics
+	  - properties data (enable/disable) pellet data   GBC mirror/palette
+	  - additional data (enable/disable) power pellets 
+
+	* Superbitmap editor 
+	  - setup "maps" of bitmaps from backgrounds (ie pengo logo)
+	    then edit them with standard bitmap tools
+
+	* text editor
+	  - menu selections:
+	    [file]       [lookup guide] [exit]
+	  - display:
+	    [ << ]  [ Bank name ] [%d/%d] [ >> ]
+
+	    [ string name ] [%d/%d]
+	    [ bitmap display ]  \_____ eventually integrate these
+	    [ text edit box  ]  /      two into one edit box.
+
+	    [ string name ] [%d/%d]
+	    [ bitmap display ]
+	    [ text edit box  ] 
+
+	     ...
+
+	* undo / redo
+	  - edit window undo 
+	  - use a circular queue of bitmaps (or subbitmaps in a full bitmap)
+	  - each event starts when the mouse button is pressed down, and ends 
+	    when the mouse button is released 
+	    OR
+	    when a tool is applied of some kind
+
+    Touches
+	* Palette 0..63 <=> 0..FF
+	* every error message gets a number for lookup purposes.
+
+Web:
+    seperate pages:
+	Main
+	What's New
+	Downloads
+	Links
+	    - age
+	    - hacks (jerky's page)
+	    - turaco bird info
+	    - turaco images
+
+Web references to put on the homepage:
+International Turacos Census
+http://www.hancockwildlife.org/info/turcsmry.htm
+
+Ark Great Blue Turaco
+Puzzle
+http://www.arkfoundation.com/pfturac.html
+
+Turaco Nature Inc. Schedule
+Nature tours
+http://www.interlog.com/~gallantg/schedule.html
+
+Red Crested Turaco
+Image
+http://www.upatsix.com/apws/red_crested_turaco.htm
+
+Red Crested Turaco
+Image
+http://www.geocities.com/Heartland/Estates/2586/Photo9.html
+
+Hartlaub's Turaco
+Bird Information
+http://epsilon3.acomp.usf.edu/aviary/hturaco.html
+
+Exotic Bird foam puzzles
+http://www.gamekids.com/ark1.html
+
+Cameroon Trip report
+http://www.geocities.com/RainForest/Vines/9684/cameroon.html
+
+The Harbinger. The Great Blue Turaco
+Poem
+http://entropy.me.usouthal.edu/harbinger/xv/970610/whiterab.html
+
+Steve Martin's poem:
+    Oh pointy birds
+    Oh pointy pointy
+    Anoint my head
+    anointy 'nointy

@@ -1,0 +1,14 @@
+Things that degui does not handle properly:
+
+what should happen:
+    Menus have \t in the string-> anything after it is right justified
+What does happen:
+    the \t gets eaten, then the rest of the string does NOT get r.j.
+
+radio buttons do not work as expected
+
+Sliders do not have a 3-d look
+
+text boxes do not use a 3-d slider
+
+listboxes (like used in the file selector) do not display the bottom-most line.

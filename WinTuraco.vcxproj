@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{e4e76ca5-3a2d-4c27-918d-dbff2e1a8082}</ProjectGuid>
+    <RootNamespace>WinTuraco</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="GUI\ANIMVIEW.C" />
+    <ClCompile Include="GUI\BITMAPED.C" />
+    <ClCompile Include="GUI\BMPDISP.C" />
+    <ClCompile Include="GUI\BUTTON.C" />
+    <ClCompile Include="GUI\DRIVSEL.C" />
+    <ClCompile Include="GUI\GUIPAL.C" />
+    <ClCompile Include="GUI\SPRTPLTE.C" />
+    <ClCompile Include="GUI\UTIL.C" />
+    <ClCompile Include="MAPED\PACMAN.C" />
+    <ClCompile Include="SRC\AGE_MAP.C" />
+    <ClCompile Include="SRC\ALLEGRO.C" />
+    <ClCompile Include="SRC\ANIMATE.C" />
+    <ClCompile Include="SRC\CODING.C" />
+    <ClCompile Include="SRC\CONFIG.C" />
+    <ClCompile Include="SRC\DLG.C" />
+    <ClCompile Include="SRC\EDITMENU.C" />
+    <ClCompile Include="SRC\EDITMODE.C" />
+    <ClCompile Include="SRC\FILEIO.C" />
+    <ClCompile Include="SRC\FONT.C" />
+    <ClCompile Include="SRC\GAMEDESC.C" />
+    <ClCompile Include="SRC\HELP.C" />
+    <ClCompile Include="SRC\ILOAD.C" />
+    <ClCompile Include="SRC\INIDRIV.C" />
+    <ClCompile Include="SRC\LIFE.C" />
+    <ClCompile Include="SRC\LIST.C" />
+    <ClCompile Include="SRC\WINTURACO.C" />
+    <ClCompile Include="SRC\MAPED.C" />
+    <ClCompile Include="SRC\PALETTE.C" />
+    <ClCompile Include="SRC\SNAP.C" />
+    <ClCompile Include="SRC\SPRITE.C" />
+    <ClCompile Include="SRC\TEXTED.C" />
+    <ClCompile Include="SRC\TOOLMENU.C" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="INCLUDE\ALLEGRO.H" />
+    <ClInclude Include="INCLUDE\ANIMATE.H" />
+    <ClInclude Include="INCLUDE\ANIMVIEW.H" />
+    <ClInclude Include="INCLUDE\BITMAPED.H" />
+    <ClInclude Include="INCLUDE\BMPDISP.H" />
+    <ClInclude Include="INCLUDE\CODING.H" />
+    <ClInclude Include="INCLUDE\CONFIG.H" />
+    <ClInclude Include="INCLUDE\DRIVSEL.H" />
+    <ClInclude Include="INCLUDE\EDITMENU.H" />
+    <ClInclude Include="INCLUDE\EDITMODE.H" />
+    <ClInclude Include="INCLUDE\FILEIO.H" />
+    <ClInclude Include="INCLUDE\GAMEDESC.H" />
+    <ClInclude Include="INCLUDE\GENERAL.H" />
+    <ClInclude Include="INCLUDE\GUIPAL.H" />
+    <ClInclude Include="INCLUDE\HELP.H" />
+    <ClInclude Include="INCLUDE\ILOAD.H" />
+    <ClInclude Include="INCLUDE\INIDRIV.H" />
+    <ClInclude Include="INCLUDE\LIFE.H" />
+    <ClInclude Include="INCLUDE\LIST.H" />
+    <ClInclude Include="INCLUDE\MAPED.H" />
+    <ClInclude Include="INCLUDE\PALETTE.H" />
+    <ClInclude Include="INCLUDE\SNAP.H" />
+    <ClInclude Include="INCLUDE\SPRITE.H" />
+    <ClInclude Include="INCLUDE\SPRTPLTE.H" />
+    <ClInclude Include="INCLUDE\TEXTED.H" />
+    <ClInclude Include="INCLUDE\TOOLMENU.H" />
+    <ClInclude Include="INCLUDE\UTIL.H" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib" />
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

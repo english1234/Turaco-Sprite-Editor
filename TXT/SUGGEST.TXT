@@ -1,0 +1,15 @@
+Suggestions from users:
+
+Blizzard: (08 DEC 98)
+- editing of multiple sprites simultaneously for gfx that span sprites
+    - superbitmap editor 
+- palettes assigned to individual sprites per bank
+    - auto palette swap
+- info tag per palette to name palette banks
+    - palette info string
+X display a pcx for color matching / game display
+    - palette image grab
+- zoom for banks
+
+The Sil: (08 DEC 98)
+- Fruit path editor for ms-pacman maps

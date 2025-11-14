@@ -1,0 +1,9 @@
+﻿  HELP.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\HELP.C(65,5): warning C4013: 'do_dialog' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\HELP.C(73,5): warning C4013: 'alert' undefined; assuming extern returning int
+  Generating code
+  31 of 303 functions (10.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    6 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  WinTuraco.vcxproj -> C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\Release\WinTuraco.exe

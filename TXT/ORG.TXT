@@ -1,0 +1,43 @@
+
+Organization of files & directories.
+
+Filesystem layout:
+    .\		.ini file, makefile, source readme, etc.
+    .\txt  	.txt files
+    .\gui	ui related functions (see below)
+    .\src	all other .c files
+    .\include	all .h files
+    .\drvsrc    compressed .ini driver files
+    .\expdriv   experimental drivers
+
+
+General functionality  (in .\src\)
+    main.c	- main(), command line parsing
+    list.c	- command line -list* options...
+    font.c	- font data
+    config.c	- ini settings for the user (turaco.ini)
+    snap.c	- screen snapshots to .pcx files...
+    cursors.c	- cursor creation and control functions
+
+APP functionality  (in .\src\)
+    dlg.c	- main app dialog (graphics editor)
+    fileio.c	- loading / saving of the rom data, file listings, etc.
+    inidriv.c	- ini driver functions load & stuff structs
+    iload.c	- ini loader for map & text drivers
+    coding.c 	- encoding & decoding of the bitmap <-> rom data
+    gamedesc.c  - global driver variables
+    palette.c	- palette related functions
+    sprite.c    - sprite bank control functions
+    toolmenu.c	- bitmap manipulations tools
+    editmenu.c	- functions for the edit menu; undo, settings...
+    help.c	- help dialogs & data.
+    maped.c	- map editor
+    texted.c	- text editor
+
+UI functionality  (in .\gui\)
+    bitmaped.c	- bitmap editor allegro UI add-on
+    tiled.c 	- tile editor allegro UI add-on (scratch pad / maped)
+    sprtplte.c 	- sprite palette UI gadget
+    guipal.c	- UI palette related functions - display & selector
+    drivsel.c	- the driver file selector
+
