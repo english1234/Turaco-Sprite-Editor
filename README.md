@@ -46,23 +46,6 @@ The original Turaco was part of the AGE (Arcade Graphics/Game Editor) project, w
 2. Extract the archive to your desired location
 3. Run `turaco.exe`
 
-### Building from Source
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/turaco-sdl2.git
-cd turaco-sdl2
-
-# Create build directory
-mkdir build
-cd build
-
-# Configure and build
-cmake ..
-cmake --build . --config Release
-
-# The executable will be in build/Release/turaco.exe
-```
-
 ## Usage
 
 ### Basic Workflow
@@ -86,84 +69,20 @@ The driver system supports numerous classic arcade games including:
 ### ROM File Locations
 Place ROM files in the same directory as the Turaco executable, or in a `roms/` subdirectory. The specific files required depend on the game driver selected.
 
-## Project Structure
-
-```
-turaco-sdl2/
-├── src/           # Source code
-├── include/       # Header files
-├── drivers/       # Arcade game drivers
-├── SDL2/          # SDL2 library files
-├── docs/          # Documentation
-└── README.md      # This file
-```
-
-## Porting Notes
-
-### Key Changes from Original
-- **Graphics System**: Migrated from Allegro to SDL2 for rendering and input
-- **File I/O**: Updated file handling to use modern Windows APIs
-- **GUI**: Reimplemented GUI components using SDL2
-- **Build System**: Added CMake support for easier compilation
-
-### Compatibility
-This port maintains compatibility with:
-- Original Turaco driver format
-- Original ROM file structures
-- Original save file formats
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
 
-### Development Guidelines
-- Maintain compatibility with original Turaco driver system
-- Follow existing code style
-- Test with multiple arcade game drivers
-- Update documentation for new features
-
-## License
-
-[Include your license here - check original Turaco licensing]
-
-The original Turaco was developed by Scott Lawrence and Ivan Mackintosh. This is an unofficial port with modernized graphics and input handling.
-
 ## Credits
 
+The original Turaco was developed by Scott Lawrence and Ivan Mackintosh. This is an unofficial port with modernized graphics and input handling.
 ### Original Turaco
 - **Scott Lawrence** - Primary developer
 - **Ivan Mackintosh** - AGE project founder and contributor
 - **Chris Moore** - Contributor
 
-### SDL2 Port
-- **[Your Name]** - Windows/SDL2 port
-
 ## Resources
 
 - [Original Turaco Information](https://www.umlautllama.com/projects/turaco/)
-- [SDL2 Documentation](https://wiki.libsdl.org/)
-- [MAME Documentation](https://docs.mamedev.org/) - For arcade hardware specifications
-
-## Known Issues
-
-- [List any known issues specific to your port]
-
-## Changelog
-
-### Version 2.0.0 (SDL2 Port)
-- Ported from DOS/Allegro to Windows/SDL2
-- Modernized graphics rendering
-- Updated input handling
-- Improved compatibility with Windows 10/11
-
-### Version 1.13 (Original)
-- Final DOS release by Scott Lawrence
-
-## Support
-
-For issues with this port, please open an issue on GitHub.
-For questions about the original Turaco or arcade game formats, refer to the resources section.
-
----
 
 **Note**: This software is intended for educational and preservation purposes. Users are responsible for ensuring they have legal rights to modify any ROM files they use with this editor.
