@@ -14,6 +14,11 @@ With Turaco, you can:
 
 This port brings Turaco to modern Windows systems using SDL2, eliminating the need for DOSBox and DOS Protected Mode Interface while maintaining compatibility with the original's functionality.
 
+## Screenshot
+
+![Turaco Sprite Editor Interface](images/turaco_main_interface.png)
+*Editing Donkey Kong sprites in WinTuraco*
+
 ## Original Turaco
 
 The original Turaco was part of the AGE (Arcade Graphics/Game Editor) project, which was spearheaded by Ivan Mackintosh with contributions from Scott Lawrence and Chris Moore. The DOS version (v1.13) required DOSBox to run on modern systems and utilized game-specific drivers to understand different arcade hardware formats.
@@ -44,7 +49,7 @@ The original Turaco was part of the AGE (Arcade Graphics/Game Editor) project, w
 ### Binary Release
 1. Download the latest release from the [Releases](../../releases) page
 2. Extract the archive to your desired location
-3. Run `turaco.exe`
+3. Run `winturaco.exe`
 
 ## Usage
 
