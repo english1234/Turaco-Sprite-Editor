@@ -16,8 +16,9 @@ This port brings Turaco to modern Windows systems using SDL2, eliminating the ne
 
 ## Screenshot
 
-![Turaco Sprite Editor Interface](images/turaco_main_interface.png)
-*Editing Donkey Kong sprites in WinTuraco*
+<p align="center">
+  <img src="images/turaco_main_interface.png" alt="Turaco Sprite Editor Interface" width="800">
+</p>
 
 ## Original Turaco
 
