@@ -90,12 +90,23 @@ int calculate_max_visible_sprites(SPRITE_PALETTE* spm, int width, int height) {
     return sprites_per_row * visible_rows;
 }
 
-// Helper function to ensure first_sprite is within valid range
+// Improved helper function to ensure first_sprite is within valid range
 void clamp_first_sprite(SPRITE_PALETTE* spm, int max_visible) {
     if (!spm) return;
 
     int max_first = spm->n_total - max_visible;
     if (max_first < 0) max_first = 0;
+
+    // Ensure we can scroll to see the very last sprite
+    // If max_first would hide the last row, adjust it
+    if (max_first > 0 && spm->n_total > max_visible) {
+        // Calculate how many sprites are in the last partial row
+        int sprites_in_last_row = spm->n_total % spm->n_per_row;
+        if (sprites_in_last_row > 0) {
+            // Adjust max_first to ensure last sprite is visible
+            max_first = spm->n_total - max_visible + (spm->n_per_row - sprites_in_last_row);
+        }
+    }
 
     if (spm->first_sprite > max_first) {
         spm->first_sprite = max_first;
@@ -103,6 +114,9 @@ void clamp_first_sprite(SPRITE_PALETTE* spm, int max_visible) {
     if (spm->first_sprite < 0) {
         spm->first_sprite = 0;
     }
+
+    printf("DEBUG: clamp_first_sprite - first_sprite=%d, max_first=%d, n_total=%d, max_visible=%d\n",
+        spm->first_sprite, max_first, spm->n_total, max_visible);
 }
 
 int sprite_palette_proc(int msg, DIALOG* d, int c)
@@ -192,25 +206,37 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
                 int needs_scrollbar = (total_sprites > max_visible_sprites);
 
                 if (needs_scrollbar) {
-                    // Draw scrollbar on the right side
-                    int scrollbar_x = sprite_area_width + 2;
+                    // Draw scrollbar background
+                    int scrollbar_width = 12;
+                    int scrollbar_x = d->w - scrollbar_width - 2;
 
                     // Draw scrollbar track
                     rectfill(temp, scrollbar_x, 2, d->w - 2, d->h - 2, GUI_MID);
                     rect(temp, scrollbar_x, 2, d->w - 2, d->h - 2, GUI_FORE);
 
                     // Calculate scrollbar thumb size and position
+                    // Use adjusted max_first for accurate scrolling
+                    int adjusted_max_first = total_sprites - max_visible_sprites;
+                    int sprites_in_last_row = total_sprites % ixmax;
+                    if (sprites_in_last_row > 0 && adjusted_max_first > 0) {
+                        adjusted_max_first = total_sprites - max_visible_sprites + (ixmax - sprites_in_last_row);
+                    }
+                    if (adjusted_max_first < 0) adjusted_max_first = 0;
+
                     float visible_ratio = (float)max_visible_sprites / total_sprites;
                     int thumb_height = (d->h - 4) * visible_ratio;
                     if (thumb_height < 16) thumb_height = 16;
 
                     float scroll_ratio = 0.0;
-                    int scroll_range = total_sprites - max_visible_sprites;
-                    if (scroll_range > 0) {
-                        scroll_ratio = (float)spm->first_sprite / scroll_range;
+                    if (adjusted_max_first > 0) {
+                        scroll_ratio = (float)spm->first_sprite / adjusted_max_first;
                     }
 
                     int thumb_y = 2 + (int)((d->h - 4 - thumb_height) * scroll_ratio);
+
+                    // Ensure thumb stays within bounds
+                    if (thumb_y < 2) thumb_y = 2;
+                    if (thumb_y + thumb_height > d->h - 2) thumb_y = d->h - 2 - thumb_height;
 
                     // Draw scrollbar thumb
                     rectfill(temp, scrollbar_x + 1, thumb_y,
@@ -218,8 +244,8 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
                     rect(temp, scrollbar_x + 1, thumb_y,
                         d->w - 3, thumb_y + thumb_height, GUI_FORE);
 
-                    printf("DEBUG: Scrollbar - dialog=(%d,%d,%d,%d), scrollbar_x=%d, thumb_y=%d\n",
-                        d->x, d->y, d->w, d->h, scrollbar_x, thumb_y);
+                 //   printf("DEBUG: Scrollbar - first_sprite=%d, total=%d, max_visible=%d, adjusted_max=%d, thumb_y=%d\n",
+                  //      spm->first_sprite, total_sprites, max_visible_sprites, adjusted_max_first, thumb_y);
                 }
 
                 ic = spm->first_sprite;
@@ -317,20 +343,29 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
               int total_sprites = spm->n_total;
 
               if (total_sprites > max_visible) {
+                  // Use adjusted max_first for accurate scrolling to bottom
+                  int adjusted_max_first = total_sprites - max_visible;
+                  int sprites_in_last_row = total_sprites % spm->n_per_row;
+                  if (sprites_in_last_row > 0 && adjusted_max_first > 0) {
+                      adjusted_max_first = total_sprites - max_visible + (spm->n_per_row - sprites_in_last_row);
+                  }
+                  if (adjusted_max_first < 0) adjusted_max_first = 0;
+
                   // Calculate click position relative to scrollbar track
                   int relative_y = mouse_y - d->y;
                   float click_ratio = (float)relative_y / (d->h - 4);
 
                   // Calculate new first_sprite based on click position
-                  int new_first_sprite = (int)((total_sprites - max_visible) * click_ratio);
+                  int new_first_sprite = (int)(adjusted_max_first * click_ratio);
 
                   // Clamp to valid range
                   if (new_first_sprite < 0) new_first_sprite = 0;
-                  if (new_first_sprite > total_sprites - max_visible)
-                      new_first_sprite = total_sprites - max_visible;
+                  if (new_first_sprite > adjusted_max_first)
+                      new_first_sprite = adjusted_max_first;
 
                   spm->first_sprite = new_first_sprite;
-                  printf("DEBUG: Scrolling to first_sprite=%d\n", spm->first_sprite);
+                  printf("DEBUG: Scrolling to first_sprite=%d (adjusted_max=%d)\n",
+                      spm->first_sprite, adjusted_max_first);
                   return D_REDRAW;
               }
           }

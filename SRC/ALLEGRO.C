@@ -1265,8 +1265,8 @@ int d_list_proc(int msg, DIALOG* d, int c) {
             hline(screen, scrollbar_x + 1, thumb_y + thumb_height - 1, d->x + d->w - 2, GUI_D_SHAD);
             vline(screen, d->x + d->w - 2, thumb_y, thumb_y + thumb_height - 1, GUI_D_SHAD);
 
-            printf("DEBUG: List scrollbar - scroll_pos=%d, thumb_y=%d, thumb_height=%d\n",
-                scroll_pos, thumb_y, thumb_height);
+          //  printf("DEBUG: List scrollbar - scroll_pos=%d, thumb_y=%d, thumb_height=%d\n",
+           //     scroll_pos, thumb_y, thumb_height);
         }
 
         /* Draw visible items */
