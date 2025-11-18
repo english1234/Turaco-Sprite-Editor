@@ -30,6 +30,7 @@ char title_date[] = "07 Oct 1999";
 #include "../INCLUDE/toolmenu.h"
 #include "../INCLUDE/BITMAPED.H"
 #include "../INCLUDE/UTIL.H"
+#include <excpt.h>
 
 #include SDL_PATH
 
@@ -363,9 +364,21 @@ int setup_gfx_mode(void)
 static int active_menu = -1;
 static int menu_bar_hover = -1;
 
+// Helper function to count menu items safely
+int count_menu_items(MENU* menu) {
+    if (!menu) return 0;
+    int count = 0;
+    while (menu[count].text != NULL) {
+        count++;
+    }
+    return count;
+}
+
 int d_menu_proc(int msg, DIALOG* d, int c) {
     MENU* menu = (MENU*)d->dp;
     static int menu_bar_hover = -1;
+
+  
 
     // No scaling calculations needed!
     const int menu_bar_height = 16;
@@ -481,37 +494,94 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
 
                         printf("Menu index i=%d, d->dp=%p, menu=%p\n", i, d->dp, menu);
                         printf("menu[%d].child=%p\n", i, menu[i].child);
-                        printf("Checking menu[%d].child[%d]:\n", i, selected);
-                        printf("  text=%p (%s)\n", menu[i].child[selected].text,
-                            menu[i].child[selected].text ? menu[i].child[selected].text : "NULL");
-                        printf("  proc=%p\n", (void*)menu[i].child[selected].proc);
 
+                        if (selected >= 0 && menu[i].child) {
+                            int child_count = count_menu_items(menu[i].child);
+                            printf("Checking menu[%d].child[%d] (total children: %d):\n", i, selected, child_count);
 
-                        if (selected >= 0 && menu[i].child[selected].proc) {
-                            printf("Executing submenu item %d\n", selected);
-                            printf("Menu text: '%s'\n", menu[i].child[selected].text ? menu[i].child[selected].text : "NULL");
-                            printf("Proc pointer: %p\n", (void*)menu[i].child[selected].proc);
+                            if (selected < child_count) {
+                                MENU* selected_menu = &menu[i].child[selected];
+                                printf("  text=%p (%s)\n", selected_menu->text,
+                                    selected_menu->text ? selected_menu->text : "NULL");
+                                printf("  proc=%p\n", (void*)selected_menu->proc);
 
-                            // Try to read the first byte of the function to see if it's valid code
-                            unsigned char* func_ptr = (unsigned char*)menu[i].child[selected].proc;
-                            printf("First 4 bytes at proc address: %02X %02X %02X %02X\n",
-                                func_ptr[0], func_ptr[1], func_ptr[2], func_ptr[3]);
+                                // SAFE MENU EXECUTION WITH ERROR HANDLING
+                                if (selected_menu->proc) {
+                                    printf("DEBUG: Attempting to execute menu function at address: %p\n",
+                                        (void*)selected_menu->proc);
+                                    printf("DEBUG: Menu item text: '%s'\n",
+                                        selected_menu->text ? selected_menu->text : "NULL");
 
-                            // Also print the actual address of help_general for comparison
-                            extern int help_general(void);
-                            printf("Actual help_general address: %p\n", (void*)help_general);
+                                    // Verify the function pointer looks reasonable
+                                    if ((uintptr_t)selected_menu->proc < 0x1000) {
+                                        printf("ERROR: Invalid function pointer (too low: %p)\n",
+                                            (void*)selected_menu->proc);
+                                        return D_O_K;
+                                    }
 
+                                    // Try to call the function with better error handling
+                                    int result = D_O_K;
 
-                            int result = menu[i].child[selected].proc();
-                            printf("Submenu proc returned: %d\n", result);
-                            return result;
+#ifdef _WIN32
+                                    __try {
+                                        result = selected_menu->proc();
+                                        printf("DEBUG: Menu function returned: %d\n", result);
+                                    }
+                                    __except (EXCEPTION_EXECUTE_HANDLER) {
+                                        printf("ERROR: Crash executing menu function at %p!\n",
+                                            (void*)selected_menu->proc);
+                                        return D_O_K;
+                                    }
+#else
+                                    // For non-Windows platforms
+                                    result = selected_menu->proc();
+                                    printf("DEBUG: Menu function returned: %d\n", result);
+#endif
+
+                                    return result;
+                                }
+                                else {
+                                    printf("ERROR: Menu function pointer is NULL\n");
+                                }
+                            }
+                            else {
+                                printf("ERROR: Menu selection out of bounds: %d >= %d\n",
+                                    selected, child_count);
+                            }
+                        }
+                        else {
+                            printf("DEBUG: No menu item selected or menu child is NULL\n");
                         }
                         return D_REDRAW;
                     }
                     else if (menu[i].proc) {
-                        // Execute menu action directly
-                        printf("Executing menu action\n");
-                        int result = menu[i].proc();
+                        // Execute menu action directly with safety checks
+                        printf("Executing menu action directly\n");
+                        printf("Menu function pointer: %p\n", (void*)menu[i].proc);
+
+                        // Safety check
+                        if ((uintptr_t)menu[i].proc < 0x1000) {
+                            printf("ERROR: Invalid direct menu function pointer: %p\n",
+                                (void*)menu[i].proc);
+                            return D_O_K;
+                        }
+
+                        int result = D_O_K;
+#ifdef _WIN32
+                        __try {
+                            result = menu[i].proc();
+                            printf("Direct menu proc returned: %d\n", result);
+                        }
+                        __except (EXCEPTION_EXECUTE_HANDLER) {
+                            printf("ERROR: Crash executing direct menu function at %p\n",
+                                (void*)menu[i].proc);
+                            return D_O_K;
+                        }
+#else
+                        result = menu[i].proc();
+                        printf("Direct menu proc returned: %d\n", result);
+#endif
+
                         return result;
                     }
                     break;
@@ -819,6 +889,26 @@ int do_dialog(DIALOG* dialog, int focus_obj) {
                 printf("SDL_QUIT event received\n");
                 running = 0;
                 result = -1;
+                break;
+
+                // In the event handling switch statement in do_dialog (winturaco.c)
+            case SDL_MOUSEWHEEL:
+                // Update global mouse_z variable for compatibility
+                mouse_z += event.wheel.y;
+
+                // Also send wheel messages to the dialog object under mouse
+                for (int i = 0; dialog[i].proc != NULL; i++) {
+                    if (mouse_x >= dialog[i].x && mouse_x < dialog[i].x + dialog[i].w &&
+                        mouse_y >= dialog[i].y && mouse_y < dialog[i].y + dialog[i].h) {
+
+                        int wheel_direction = (event.wheel.y > 0) ? 1 : -1;
+                        int ret = dialog[i].proc(MSG_WHEEL, &dialog[i], wheel_direction);
+                        if (ret & D_REDRAW) {
+                            dialog[i].proc(MSG_DRAW, &dialog[i], 0);
+                        }
+                        break;
+                    }
+                }
                 break;
 
             case SDL_MOUSEBUTTONDOWN:

@@ -61,8 +61,6 @@ int edit_mode_eye(void)
     return D_O_K;
 }
 
-
-
 void create_cursors(MYBITMAP * curs, MYBITMAP * busy, MYBITMAP * flood, MYBITMAP * eye)
 {
     if (curs != NULL)
@@ -153,7 +151,6 @@ void create_cursors(MYBITMAP * curs, MYBITMAP * busy, MYBITMAP * flood, MYBITMAP
     set_mouse_sprite_focus(0,0);
 }
 
-
 void Init_Cursors(void)
 {
     cursor       = create_bitmap(32,32);
@@ -174,7 +171,6 @@ void DeInit_Cursors(void)
     destroy_bitmap(eye_cursor);
     destroy_bitmap(null_cursor);
 }
-
 
 void busy(void)
 {

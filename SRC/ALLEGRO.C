@@ -29,6 +29,91 @@ extern Uint32* sdl_pixels;
 #define strdup _strdup
 #endif
 
+/* --------- Helper functions to reduce duplication --------- */
+
+/* Draw a filled box with border. */
+static void draw_bg_and_border(MYBITMAP* bmp, int x, int y, int w, int h, int bg, int fg) {
+    if (!bmp) return;
+    rectfill(bmp, x, y, x + w - 1, y + h - 1, bg);
+    rect(bmp, x, y, x + w - 1, y + h - 1, fg);
+}
+
+/* Parse a string removing single '&' markers, producing display text and
+   the underline position (index into display text), -1 if none. */
+static void parse_ampersand(const char* src, char* dest, size_t dest_sz, int* underline_pos) {
+    if (!src || !dest || dest_sz == 0) {
+        if (underline_pos) *underline_pos = -1;
+        return;
+    }
+
+    size_t di = 0;
+    int u = -1;
+    for (size_t si = 0; src[si] != '\0' && di + 1 < dest_sz; ++si) {
+        if (src[si] == '&') {
+            /* If & is last char, ignore; else mark underline for next char */
+            if (src[si + 1] != '\0') {
+                u = (int)di;
+                continue; /* Skip the '&' */
+            }
+        }
+        dest[di++] = src[si];
+    }
+    dest[di] = '\0';
+    if (underline_pos) *underline_pos = u;
+}
+
+/* Draw parsed text centered in a box; returns underline_pos (if requested). */
+static void draw_parsed_text_centered(MYBITMAP* bmp, FONT* fnt, const char* src, int x, int y, int w, int h, int color, int* underline_pos_out) {
+    if (!bmp || !fnt || !src) {
+        if (underline_pos_out) *underline_pos_out = -1;
+        return;
+    }
+
+    char display_text[256];
+    int underline_pos = -1;
+    parse_ampersand(src, display_text, sizeof(display_text), &underline_pos);
+
+    int len = (int)strlen(display_text);
+    int text_width = len * 8;
+    int text_height = 8;
+    int text_x = x + (w - text_width) / 2;
+    int text_y = y + (h - text_height) / 2;
+    textout(bmp, fnt, display_text, text_x, text_y, color);
+
+    if (underline_pos >= 0) {
+        int underline_x = text_x + (underline_pos * 8);
+        int underline_y = text_y + 7;
+        hline(bmp, underline_x, underline_y, underline_x + 7, color);
+    }
+
+    if (underline_pos_out) *underline_pos_out = underline_pos;
+}
+
+/* Draw parsed text at absolute coordinates; returns underline_pos (if requested). */
+static void draw_parsed_text_at(MYBITMAP* bmp, FONT* fnt, const char* src, int x, int y, int color, int* underline_pos_out) {
+    if (!bmp || !fnt || !src) {
+        if (underline_pos_out) *underline_pos_out = -1;
+        return;
+    }
+
+    char display_text[256];
+    int underline_pos = -1;
+    parse_ampersand(src, display_text, sizeof(display_text), &underline_pos);
+
+    textout(bmp, fnt, display_text, x, y, color);
+
+    if (underline_pos >= 0) {
+        int underline_x = x + (underline_pos * 8);
+        int underline_y = y + 7;
+        hline(bmp, underline_x, underline_y, underline_x + 7, color);
+    }
+
+    if (underline_pos_out) *underline_pos_out = underline_pos;
+}
+
+/* --------- End helpers --------- */
+
+
 // Text procedure - no scaling
 int d_text_proc(int msg, DIALOG* d, int c) {
     if (msg == MSG_DRAW && d->dp) {
@@ -82,7 +167,7 @@ int d_shadow_box_proc(int msg, DIALOG* d, int c) {
     return D_O_K;
 }
 
-// Draw centered text - no scaling
+/* Draw centered text - no scaling */
 int d_ctext_proc(int msg, DIALOG* d, int c) {
     if (msg == MSG_DRAW && d->dp) {
         // Use original coordinates - no scaling
@@ -91,17 +176,12 @@ int d_ctext_proc(int msg, DIALOG* d, int c) {
         int w = d->w;
         int h = d->h;
 
-        char* text = (char*)d->dp;
-        int text_width = strlen(text) * 8;  // Original character width
-        int text_height = 8;                // Original character height
-        int center_x = x + (w - text_width) / 2;
-        int center_y = y + (h - text_height) / 2;
-        textout(screen, font, text, center_x, center_y, d->fg);
+        draw_parsed_text_centered(screen, font, (char*)d->dp, x, y, w, h, d->fg, NULL);
     }
     return D_O_K;
 }
 
-// Improved d_textbox_proc with word wrap
+/* Improved d_textbox_proc with word wrap */
 int d_textbox_proc(int msg, DIALOG* d, int c) {
     static int scroll_pos = 0;
     static char** wrapped_lines = NULL;
@@ -306,40 +386,13 @@ int d_button_proc(int msg, DIALOG* d, int c) {
     switch (msg) {
     case MSG_DRAW:
         // Draw at original coordinates - no scaling needed!
-        rectfill(screen, d->x, d->y, d->x + d->w - 1, d->y + d->h - 1, d->bg);
-        rect(screen, d->x, d->y, d->x + d->w - 1, d->y + d->h - 1, d->fg);
+        draw_bg_and_border(screen, d->x, d->y, d->w, d->h, d->bg, d->fg);
 
         if (d->dp) {
             char* text = (char*)d->dp;
 
-            // Parse text to remove '&' character
-            char display_text[256];
-            int display_pos = 0;
-            int underline_pos = -1;
-
-            for (int j = 0; text[j] != '\0' && display_pos < 255; j++) {
-                if (text[j] == '&') {
-                    underline_pos = display_pos;  // Mark position for underline
-                    // Skip the '&' - don't add to display_text
-                }
-                else {
-                    display_text[display_pos++] = text[j];
-                }
-            }
-            display_text[display_pos] = '\0';
-
-            int text_width = display_pos * 8;  // Use display length, not original
-            int text_height = 8;
-            int text_x = d->x + (d->w - text_width) / 2;
-            int text_y = d->y + (d->h - text_height) / 2;
-            textout(screen, font, display_text, text_x, text_y, d->fg);
-
-            // Draw underline under the shortcut key
-            if (underline_pos >= 0) {
-                int underline_x = text_x + (underline_pos * 8);
-                int underline_y = text_y + 7;
-                hline(screen, underline_x, underline_y, underline_x + 7, d->fg);
-            }
+            // Use helper to parse and draw centered text with underline
+            draw_parsed_text_centered(screen, font, text, d->x, d->y, d->w, d->h, d->fg, NULL);
         }
         break;
 
@@ -355,50 +408,65 @@ int d_button_proc(int msg, DIALOG* d, int c) {
     return D_O_K;
 }
 
-// Draw a horizontal line
-void hline(MYBITMAP* bmp, int x1, int y, int x2, int color) {
+/* Helper that handles horizontal or vertical lines (with clipping),
+   falling back to the general line routine for non-axis-aligned requests. */
+static void draw_axis_aligned_line(MYBITMAP* bmp, int x1, int y1, int x2, int y2, int color) {
     if (!bmp) return;
 
-    // Ensure x1 <= x2
-    if (x1 > x2) {
-        int temp = x1;
-        x1 = x2;
-        x2 = temp;
+    /* Vertical line */
+    if (x1 == x2) {
+        int x = x1;
+        int ystart = y1;
+        int yend = y2;
+        if (ystart > yend) {
+            int tmp = ystart; ystart = yend; yend = tmp;
+        }
+
+        /* Clip against bitmap bounds */
+        if (x < 0 || x >= bmp->w) return;
+        if (yend < 0 || ystart >= bmp->h) return;
+        if (ystart < 0) ystart = 0;
+        if (yend >= bmp->h) yend = bmp->h - 1;
+
+        for (int y = ystart; y <= yend; y++) {
+            putpixel(bmp, x, y, color);
+        }
+        return;
     }
 
-    // Clip to bitmap bounds
-    if (y < 0 || y >= bmp->h) return;
-    if (x2 < 0 || x1 >= bmp->w) return;
-    if (x1 < 0) x1 = 0;
-    if (x2 >= bmp->w) x2 = bmp->w - 1;
+    /* Horizontal line */
+    if (y1 == y2) {
+        int y = y1;
+        int xstart = x1;
+        int xend = x2;
+        if (xstart > xend) {
+            int tmp = xstart; xstart = xend; xend = tmp;
+        }
 
-    // Draw the horizontal line
-    for (int x = x1; x <= x2; x++) {
-        putpixel(bmp, x, y, color);
+        /* Clip against bitmap bounds */
+        if (y < 0 || y >= bmp->h) return;
+        if (xend < 0 || xstart >= bmp->w) return;
+        if (xstart < 0) xstart = 0;
+        if (xend >= bmp->w) xend = bmp->w - 1;
+
+        for (int x = xstart; x <= xend; x++) {
+            putpixel(bmp, x, y, color);
+        }
+        return;
     }
+
+    /* Not axis-aligned: use the general Bresenham line routine. */
+    line(bmp, x1, y1, x2, y2, color);
 }
 
-// Draw a vertical line
+/* Draw a horizontal line (thin wrapper now using the combined helper) */
+void hline(MYBITMAP* bmp, int x1, int y, int x2, int color) {
+    draw_axis_aligned_line(bmp, x1, y, x2, y, color);
+}
+
+/* Draw a vertical line (thin wrapper now using the combined helper) */
 void vline(MYBITMAP* bmp, int x, int y1, int y2, int color) {
-    if (!bmp) return;
-
-    // Ensure y1 <= y2
-    if (y1 > y2) {
-        int temp = y1;
-        y1 = y2;
-        y2 = temp;
-    }
-
-    // Clip to bitmap bounds
-    if (x < 0 || x >= bmp->w) return;
-    if (y2 < 0 || y1 >= bmp->h) return;
-    if (y1 < 0) y1 = 0;
-    if (y2 >= bmp->h) y2 = bmp->h - 1;
-
-    // Draw the vertical line
-    for (int y = y1; y <= y2; y++) {
-        putpixel(bmp, x, y, color);
-    }
+    draw_axis_aligned_line(bmp, x, y1, x, y2, color);
 }
 
 // Set text mode to ensure text is visible
@@ -1075,6 +1143,9 @@ static const char* d_list_get_item_text(void* dp, int use_getter, char** items, 
 int d_list_proc(int msg, DIALOG* d, int c) {
     static int scroll_pos = 0;
     static int selected_item = -1;
+    static int scrollbar_dragging = 0;
+    static int drag_start_y = 0;
+    static int drag_start_scroll = 0;
 
     char** items = NULL;
     char* (*getter)(int, int*) = NULL;
@@ -1146,13 +1217,15 @@ int d_list_proc(int msg, DIALOG* d, int c) {
     }
 
     /* Calculate visible items */
-    int visible_items = d->h / 10; /* 10 pixels per item */
+    int item_height = 10; /* 10 pixels per item */
+    int visible_items = d->h / item_height;
     int i;
 
     switch (msg) {
     case MSG_START:
         scroll_pos = 0;
         selected_item = -1;
+        scrollbar_dragging = 0;
         break;
 
     case MSG_DRAW:
@@ -1162,18 +1235,38 @@ int d_list_proc(int msg, DIALOG* d, int c) {
 
         /* Draw scrollbar if needed */
         if (item_count > visible_items) {
-            int scrollbar_width = 12;
+            int scrollbar_width = 16; // Wider for easier clicking
             int scrollbar_x = d->x + d->w - scrollbar_width;
-            int thumb_height = (visible_items * d->h) / item_count;
-            if (thumb_height < 8) thumb_height = 8;
-            int thumb_y = d->y + (scroll_pos * d->h) / item_count;
 
-            rectfill(screen, scrollbar_x, d->y, d->x + d->w - 1, d->y + d->h - 1, 8);
-            rect(screen, scrollbar_x, d->y, d->x + d->w - 1, d->y + d->h - 1, 15);
+            // Calculate thumb size and position
+            float visible_ratio = (float)visible_items / item_count;
+            int thumb_height = (d->h - 2) * visible_ratio;
+            if (thumb_height < 24) thumb_height = 24; // Minimum thumb size
 
-            /* Draw scroll thumb */
+            float scroll_ratio = (float)scroll_pos / (item_count - visible_items);
+            int thumb_y = d->y + 1 + (int)((d->h - 2 - thumb_height) * scroll_ratio);
+
+            // Draw scrollbar track with 3D effect
+            rectfill(screen, scrollbar_x, d->y, d->x + d->w - 1, d->y + d->h - 1, GUI_MID);
+
+            // 3D border for track
+            hline(screen, scrollbar_x, d->y, d->x + d->w - 1, GUI_L_SHAD);
+            vline(screen, scrollbar_x, d->y, d->y + d->h - 1, GUI_L_SHAD);
+            hline(screen, scrollbar_x, d->y + d->h - 1, d->x + d->w - 1, GUI_D_SHAD);
+            vline(screen, d->x + d->w - 1, d->y, d->y + d->h - 1, GUI_D_SHAD);
+
+            /* Draw scroll thumb with 3D effect */
             rectfill(screen, scrollbar_x + 1, thumb_y, d->x + d->w - 2,
-                thumb_y + thumb_height - 1, 7);
+                thumb_y + thumb_height - 1, GUI_SELECT);
+
+            // 3D border for thumb
+            hline(screen, scrollbar_x + 1, thumb_y, d->x + d->w - 2, GUI_L_SHAD);
+            vline(screen, scrollbar_x + 1, thumb_y, thumb_y + thumb_height - 1, GUI_L_SHAD);
+            hline(screen, scrollbar_x + 1, thumb_y + thumb_height - 1, d->x + d->w - 2, GUI_D_SHAD);
+            vline(screen, d->x + d->w - 2, thumb_y, thumb_y + thumb_height - 1, GUI_D_SHAD);
+
+            printf("DEBUG: List scrollbar - scroll_pos=%d, thumb_y=%d, thumb_height=%d\n",
+                scroll_pos, thumb_y, thumb_height);
         }
 
         /* Draw visible items */
@@ -1184,11 +1277,11 @@ int d_list_proc(int msg, DIALOG* d, int c) {
 
             if (item_index >= item_count) break;
 
-            item_y = d->y + (i * 10);
+            item_y = d->y + (i * item_height);
 
             /* Highlight selected item */
             if (item_index == selected_item) {
-                rectfill(screen, d->x + 1, item_y, d->x + d->w - 13, item_y + 9, 1); // Blue highlight
+                rectfill(screen, d->x + 1, item_y, d->x + d->w - (item_count > visible_items ? 17 : 1), item_y + item_height - 1, 1); // Blue highlight
             }
 
             /* Get item text safely */
@@ -1208,8 +1301,18 @@ int d_list_proc(int msg, DIALOG* d, int c) {
             mouse_y >= d->y && mouse_y < d->y + d->h) {
 
             /* Check if click is on scrollbar */
-            if (item_count > visible_items && mouse_x >= d->x + d->w - 12) {
-                /* Handle scrollbar click */
+            int scrollbar_width = 16;
+            int scrollbar_x = d->x + d->w - scrollbar_width;
+
+            if (item_count > visible_items && mouse_x >= scrollbar_x) {
+                printf("DEBUG: List scrollbar click detected\n");
+
+                /* Handle scrollbar click - start dragging */
+                scrollbar_dragging = 1;
+                drag_start_y = mouse_y;
+                drag_start_scroll = scroll_pos;
+
+                // Also update position immediately
                 int click_rel_y = mouse_y - d->y;
                 scroll_pos = (click_rel_y * item_count) / d->h;
                 if (scroll_pos < 0) scroll_pos = 0;
@@ -1219,7 +1322,7 @@ int d_list_proc(int msg, DIALOG* d, int c) {
             }
             else {
                 /* Click on list item */
-                int clicked_item = scroll_pos + ((mouse_y - d->y) / 10);
+                int clicked_item = scroll_pos + ((mouse_y - d->y) / item_height);
                 if (clicked_item < item_count) {
                     selected_item = clicked_item;
                     d->d1 = selected_item; /* Store selection */
@@ -1229,9 +1332,32 @@ int d_list_proc(int msg, DIALOG* d, int c) {
         }
         break;
 
+    case MSG_IDLE:
+        if (scrollbar_dragging && (mouse_b & 1)) {
+            // Continue dragging the scrollbar
+            int delta_y = mouse_y - drag_start_y;
+            int delta_items = (delta_y * item_count) / d->h;
+
+            int new_scroll_pos = drag_start_scroll + delta_items;
+            if (new_scroll_pos < 0) new_scroll_pos = 0;
+            if (new_scroll_pos > item_count - visible_items)
+                new_scroll_pos = item_count - visible_items;
+
+            if (new_scroll_pos != scroll_pos) {
+                scroll_pos = new_scroll_pos;
+                return D_REDRAWME;
+            }
+        }
+        else if (scrollbar_dragging && !(mouse_b & 1)) {
+            // Mouse button released, stop dragging
+            scrollbar_dragging = 0;
+        }
+        break;
+
     case MSG_WHEEL:
-        /* Mouse wheel scrolling */
-        scroll_pos -= c; /* c is wheel delta */
+        /* Mouse wheel scrolling - more responsive */
+        int wheel_delta = c * 3; // Scroll 3 items per wheel tick
+        scroll_pos -= wheel_delta;
         if (scroll_pos < 0) scroll_pos = 0;
         if (scroll_pos > item_count - visible_items)
             scroll_pos = item_count - visible_items;
@@ -1257,6 +1383,34 @@ int d_list_proc(int msg, DIALOG* d, int c) {
                 d->d1 = selected_item;
                 return D_REDRAWME;
             }
+        }
+        else if (c == (SDL_SCANCODE_PAGEUP << 8)) {
+            /* Page Up */
+            scroll_pos -= visible_items;
+            if (scroll_pos < 0) scroll_pos = 0;
+            return D_REDRAWME;
+        }
+        else if (c == (SDL_SCANCODE_PAGEDOWN << 8)) {
+            /* Page Down */
+            scroll_pos += visible_items;
+            if (scroll_pos > item_count - visible_items)
+                scroll_pos = item_count - visible_items;
+            return D_REDRAWME;
+        }
+        else if (c == (SDL_SCANCODE_HOME << 8)) {
+            /* Home key - go to top */
+            scroll_pos = 0;
+            selected_item = 0;
+            d->d1 = selected_item;
+            return D_REDRAWME;
+        }
+        else if (c == (SDL_SCANCODE_END << 8)) {
+            /* End key - go to bottom */
+            scroll_pos = item_count - visible_items;
+            if (scroll_pos < 0) scroll_pos = 0;
+            selected_item = item_count - 1;
+            d->d1 = selected_item;
+            return D_REDRAWME;
         }
         else if (c == (SDL_SCANCODE_RETURN << 8)) {
             /* Enter key - select current item */
