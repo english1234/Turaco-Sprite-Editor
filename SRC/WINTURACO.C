@@ -792,8 +792,10 @@ int do_dialog(DIALOG* dialog, int focus_obj) {
 
     // Send MSG_START to all dialog objects
     for (int i = 0; dialog[i].proc != NULL; i++) {
-        // printf("Initializing dialog object %d\n", i);
-        dialog[i].proc(MSG_START, &dialog[i], 0);
+        // Safety check: make sure the proc function exists
+        if (dialog[i].proc) {
+            dialog[i].proc(MSG_START, &dialog[i], 0);
+        }
     }
 
     // Draw initial state
@@ -1195,7 +1197,8 @@ void allegro_init(void) {
     // Create texture at the ORIGINAL resolution (320x240)
     sdl_texture = SDL_CreateTexture(
         sdl_renderer,
-        SDL_PIXELFORMAT_ARGB8888,
+      //  SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_ABGR8888,
         SDL_TEXTUREACCESS_STREAMING,
         320,  // Original resolution width
         240   // Original resolution height

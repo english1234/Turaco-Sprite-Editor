@@ -27,31 +27,53 @@ extern int alert(const char*, const char*, const char*, const char*, const char*
 
 void unload_driver(void)
 {
-    FreeDriver();
-    InitialiseGameDesc();
-    free(sprite_bank);
-    sprite_bank = NULL; 
+	// Only unload if a driver is actually loaded
+	if (GameDriverLoaded) {
+		FreeDriver();
+		GameDriverLoaded = FALSE;  // Important: mark as unloaded
+	}
 
-    destroy_bitmap(current_sprite);
-    current_sprite = create_bitmap(ED_DEF_SIZE,ED_DEF_SIZE);
-    clear_to_color(current_sprite, FIRST_USER_COLOR);
+	InitialiseGameDesc();
+
+	// Only free sprite_bank if it exists
+	if (sprite_bank) {
+		free(sprite_bank);
+		sprite_bank = NULL;
+	}
+
+	// Only destroy and recreate current_sprite if it exists
+	if (current_sprite) {
+		destroy_bitmap(current_sprite);
+	}
+	current_sprite = create_bitmap(ED_DEF_SIZE, ED_DEF_SIZE);
+	if (current_sprite) {
+		clear_to_color(current_sprite, FIRST_USER_COLOR);
+	}
 }
 
-void try_loading_the_driver(char * drivername)
+void try_loading_the_driver(char* drivername)
 {
-    unload_driver();
+	printf("DEBUG: try_loading_the_driver called with: %s\n", drivername);
 
-    if (LoadDriver(drivername) == TRUE)
-    {
-	// setup the sprite palette & stuff..
-	set_Gfx_bank(0);
-
-	// load in the palette
-	Init_Palette();
-    } else {
-	// we should do this here...
+	// First unload any current driver
 	unload_driver();
-    }
+
+	if (LoadDriver(drivername) == TRUE)
+	{
+		printf("DEBUG: Driver loaded successfully\n");
+		// setup the sprite palette & stuff..
+		set_Gfx_bank(0);
+
+		// load in the palette
+		Init_Palette();
+
+		printf("DEBUG: Graphics bank and palette initialized\n");
+	}
+	else {
+		printf("DEBUG: Driver loading failed\n");
+		// we should do this here...
+		unload_driver();
+	}
 }
 
 //

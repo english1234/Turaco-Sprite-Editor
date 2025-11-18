@@ -509,7 +509,27 @@ int IndexFromNumColours(int Cols)
    return Count;
 }
 
+// Helper function to extract directory from full path
+void extract_directory_from_path(const char* full_path, char* dir_buffer, int buffer_size) {
+    char* last_slash = strrchr(full_path, '/');
+    if (!last_slash) last_slash = strrchr(full_path, '\\');
 
+    if (last_slash) {
+        int dir_len = last_slash - full_path;
+        if (dir_len < buffer_size) {
+            strncpy(dir_buffer, full_path, dir_len);
+            dir_buffer[dir_len] = '\0';
+        }
+        else {
+            strncpy(dir_buffer, full_path, buffer_size - 1);
+            dir_buffer[buffer_size - 1] = '\0';
+        }
+    }
+    else {
+        // No directory in path
+        dir_buffer[0] = '\0';
+    }
+}
 
 BOOL LoadGfxRomData(void)
 {
@@ -518,8 +538,15 @@ BOOL LoadGfxRomData(void)
     char ROMDirWithName[256];
     int total = 0;
 
-    // find the rom path. Use the first rom name from the set
+    printf("\n=== LoadGfxRomData DEBUG ===\n");
+    printf("ROMDirName: %s\n", ROMDirName);
+    printf("First ROM: %s\n", GfxRoms[0].ROMName);
+    printf("ROMPath: %s\n", ROMPath);
+
+    // Build the path to look for: ROMDirName + ROM filename
+    // This will create something like "pacman/pacman.5e"
     sprintf(ROMDirWithName, "%s/%s", ROMDirName, GfxRoms[0].ROMName);
+
     printf("DEBUG: Looking for ROM path with: %s\n", ROMDirWithName);
 
     if (FindRomPath(ROMDirWithName) != 0)
@@ -547,12 +574,12 @@ BOOL LoadGfxRomData(void)
     {
         char FullPath[256];
 
-        // build full path including filename
+        // build full path: ROMPathFound + ROMDirName + ROM filename
         strcpy(FullPath, ROMPathFound);
         put_backslash(FullPath);
-        strcat(FullPath, ROMDirName);
+        strcat(FullPath, ROMDirName);  // This adds the game subdirectory (e.g., "pacman")
         put_backslash(FullPath);
-        strcat(FullPath, GfxRoms[i].ROMName);
+        strcat(FullPath, GfxRoms[i].ROMName);  // This adds the ROM filename
 
         printf("Trying to open ROM %d: %s\n", i + 1, FullPath);
 
@@ -598,6 +625,7 @@ BOOL LoadGfxRomData(void)
     }
 
     printf("All ROMs loaded successfully!\n");
+    printf("=== END LoadGfxRomData ===\n\n");
     return TRUE;
 }
 
@@ -627,85 +655,76 @@ BOOL AllocateGfxBanks(void)
 }
 
 
-// assumes inifilename includes fully qualified path
-BOOL LoadDriver(char * INIFileName)
+BOOL LoadDriver(char* INIFileName)
 {
-   BOOL retval;
-   char INIDriverName[128];
-   char * fname = get_filename(INIFileName);
-   int i = 0;
+    BOOL retval;
+    char INIDriverName[256];
+    char* fname = get_filename(INIFileName);
+    char driver_dir[256] = "";
+    int i = 0;
 
-   // free any currently loaded driver
-   FreeDriver();
-   
-   /* setup INI Driver name */
-   // JERR -- since the file selector uses a full path, we lose this next line.
-   // when i write a new file loader dialog, this will change back...
-   //sprintf(INIDriverName, "drivers/%s", fname);
+    // free any currently loaded driver
+    FreeDriver();
 
-   sprintf(INIDriverName, "%s", fname);
-   
-   /* set up ROMDirName - ini filename without extension */
-   while ((fname[i] != '\0') && (fname[i] != '.'))
-   {
-      ROMDirName[i] = fname[i];
-      i ++;
-   }
-   ROMDirName[i] = 0;
+    /* setup INI Driver name */
+    sprintf(INIDriverName, "%s", INIFileName);
 
-   // load the data from the INI file
-   push_config_state();
+    /* Extract game name from filename for ROMDirName */
+    // Use the filename without extension as the game directory name
+    i = 0;
+    while ((fname[i] != '\0') && (fname[i] != '.')) {
+        ROMDirName[i] = fname[i];
+        i++;
+    }
+    ROMDirName[i] = 0;
 
-   //set_config_file(INIDriverName);
-   set_config_file(INIFileName);
+    printf("DEBUG: Loading driver - Full path: %s\n", INIFileName);
+    printf("DEBUG: Driver filename: %s\n", fname);
+    printf("DEBUG: ROMDirName (game name): %s\n", ROMDirName);
 
-   sprintf(INI_Driver_Path, "%s", INIFileName);
+    // load the data from the INI file
+    push_config_state();
+    set_config_file(INIFileName);
+    sprintf(INI_Driver_Path, "%s", INIFileName);
 
-   retval = ReadFromDriverIniFile();
-   
-   pop_config_state();
+    retval = ReadFromDriverIniFile();
+    pop_config_state();
 
-   // did the INI read fail?
-   if (retval == FALSE)
-      return retval;
+    // did the INI read fail?
+    if (retval == FALSE)
+        return retval;
 
-   // load graphics roms into memory
-   retval = LoadGfxRomData();
+    // load graphics roms into memory
+    retval = LoadGfxRomData();
 
-   // if load failed then free all INI Driver memory and fail
-   if (retval == FALSE)
-   {
+    // if load failed then free all INI Driver memory and fail
+    if (retval == FALSE) {
+        if (GfxBanks)         free(GfxBanks);
+        if (GfxBankExtraInfo) free(GfxBankExtraInfo);
+        if (GfxRoms)          free(GfxRoms);
+        return retval;
+    }
 
-      if(GfxBanks)         free(GfxBanks);
-      if(GfxBankExtraInfo) free(GfxBankExtraInfo);
-      if(GfxRoms)          free(GfxRoms);
-      return retval;
-   }
+    // create bitmaps for graphics banks
+    retval = AllocateGfxBanks();
 
-   // create bitmaps for graphics banks
-   retval = AllocateGfxBanks();
+    // if load failed then free all INI Driver memory and loaded roms and fail
+    if (retval == FALSE) {
+        if (GfxBanks)         free(GfxBanks);
+        if (GfxBankExtraInfo) free(GfxBankExtraInfo);
+        if (GfxRoms)          free(GfxRoms);
+        if (GfxRomData)       free(GfxRomData);
+        return retval;
+    }
 
-   // if load failed then free all INI Driver memory and loaded roms and fail
-   if (retval == FALSE)
-   {
-      if(GfxBanks)         free(GfxBanks);
-      if(GfxBankExtraInfo) free(GfxBankExtraInfo);
-      if(GfxRoms)          free(GfxRoms);
-      if(GfxRomData)       free(GfxRomData);
-      return retval;
-   }
+    // now decode the graphics banks
+    SwitchGraphicsBank(-1, 0);
 
-   // now decode the graphics banks
-   SwitchGraphicsBank(-1, 0);
-   
-   // success
-   GameDriverLoaded = TRUE;
-   
-   return retval;
+    // success
+    GameDriverLoaded = TRUE;
+
+    return retval;
 }
-
-
-
 
 void FreeDriver(void)
 {

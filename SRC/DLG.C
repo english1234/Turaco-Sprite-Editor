@@ -64,7 +64,7 @@ int stub(void) { return D_O_K; }
 ///  The Menus...
 //
 
-MENU file_menu[] =
+const MENU file_menu[] =
 {
     {"&Change Game", 	file_game, NULL, 0, NULL},
     {"", 		NULL, NULL, 0, NULL},
@@ -80,7 +80,7 @@ MENU file_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-MENU edit_menu[] =
+const MENU edit_menu[] =
 {
 //    {"&Undo", 		edit_undo, NULL, D_DISABLED, NULL},
 //    {"&Redo", 		edit_redo, NULL, D_DISABLED, NULL},
@@ -101,7 +101,7 @@ MENU edit_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-MENU mode_menu[] =
+const MENU mode_menu[] =
 {
     {"&p Paint",         edit_mode_paint, NULL, 0, NULL},
     {"&f Flood Fill",    edit_mode_flood, NULL, 0, NULL},
@@ -110,7 +110,7 @@ MENU mode_menu[] =
 };
 
 
-MENU help_menu[] =
+const MENU help_menu[] =
 {
     {"&Readme",	      help_general, NULL, 0, NULL},
     {"&What's New",   help_new, NULL, 0, NULL},
@@ -118,7 +118,7 @@ MENU help_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-MENU main_menus[] =
+const MENU main_menus[] =
 {
     {"&File", 		NULL, file_menu,  0, NULL},
     {"&Edit", 		NULL, edit_menu,  0, NULL},

@@ -1407,12 +1407,202 @@ int d_slider_proc(int msg, DIALOG* d, int c) {
     return D_O_K;
 }
 
+// Enhanced file selection dialog that shows directories
+int file_select_ex(const char* title, char* path, const char* ext, int show_dirs) {
+    static char current_dir[256] = ".";
+    static int selected_index = 0;
+    static int scroll_pos = 0;
+    static char** file_list = NULL;
+    static int file_count = 0;
+
+    if (title) {
+        printf("File select: %s\n", title);
+        printf("Initial path: %s\n", path);
+        printf("Extension: %s\n", ext);
+
+        // Set initial directory from path
+        strncpy(current_dir, path, sizeof(current_dir) - 1);
+        char* last_slash = strrchr(current_dir, '/');
+        if (!last_slash) last_slash = strrchr(current_dir, '\\');
+        if (last_slash) *last_slash = '\0'; // Remove filename, keep directory
+
+        printf("Current directory: %s\n", current_dir);
+    }
+
+    // Build file list
+    if (file_list) {
+        for (int i = 0; i < file_count; i++) free(file_list[i]);
+        free(file_list);
+        file_list = NULL;
+        file_count = 0;
+    }
+
+    // Count files and directories
+    WIN32_FIND_DATAA find_data;
+    char search_pattern[256];
+    sprintf(search_pattern, "%s\\*", current_dir);
+
+    HANDLE hFind = FindFirstFileA(search_pattern, &find_data);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        printf("ERROR: Cannot open directory %s\n", current_dir);
+        return 0;
+    }
+
+    // First pass: count items
+    do {
+        // Skip . and .. entries
+        if (strcmp(find_data.cFileName, ".") == 0 || strcmp(find_data.cFileName, "..") == 0)
+            continue;
+
+        // If showing directories, include them
+        if (show_dirs && (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            file_count++;
+        }
+        // Include files with matching extension
+        else if (!(find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+            if (ext == NULL || *ext == '\0') {
+                file_count++;
+            }
+            else {
+                char* file_ext = strrchr(find_data.cFileName, '.');
+                if (file_ext && _stricmp(file_ext + 1, ext) == 0) {
+                    file_count++;
+                }
+            }
+        }
+    } while (FindNextFileA(hFind, &find_data));
+
+    FindClose(hFind);
+
+    // Allocate file list
+    file_list = (char**)malloc(file_count * sizeof(char*));
+    if (!file_list) {
+        printf("ERROR: Out of memory\n");
+        return 0;
+    }
+
+    // Second pass: populate file list
+    int index = 0;
+    hFind = FindFirstFileA(search_pattern, &find_data);
+    do {
+        // Skip . and .. entries
+        if (strcmp(find_data.cFileName, ".") == 0 || strcmp(find_data.cFileName, "..") == 0)
+            continue;
+
+        char* name = find_data.cFileName;
+        int is_dir = (find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+
+        // If showing directories, include them
+        if (show_dirs && is_dir) {
+            file_list[index] = (char*)malloc(strlen(name) + 4); // Space for [ ] and null terminator
+            sprintf(file_list[index], "[%s]", name); // Mark directories with brackets
+            index++;
+        }
+        // Include files with matching extension
+        else if (!is_dir) {
+            if (ext == NULL || *ext == '\0') {
+                file_list[index] = strdup(name);
+                index++;
+            }
+            else {
+                char* file_ext = strrchr(name, '.');
+                if (file_ext && _stricmp(file_ext + 1, ext) == 0) {
+                    file_list[index] = strdup(name);
+                    index++;
+                }
+            }
+        }
+    } while (FindNextFileA(hFind, &find_data) && index < file_count);
+
+    FindClose(hFind);
+    file_count = index; // Update actual count
+
+    // Simple text-based file dialog
+    printf("\n=== FILE SELECTION: %s ===\n", title);
+    printf("Current directory: %s\n", current_dir);
+    printf("Files and directories:\n");
+
+    for (int i = 0; i < file_count; i++) {
+        printf("%c %2d. %s\n", (i == selected_index) ? '>' : ' ', i, file_list[i]);
+    }
+    printf("\n");
+    printf("Use UP/DOWN arrows to select, ENTER to choose, ESC to cancel\n");
+
+    // Simple input loop (in a real implementation, you'd use a proper GUI dialog)
+    int done = 0;
+    while (!done) {
+        if (kbhit()) {
+            int key = getch();
+            switch (key) {
+            case 72: // Up arrow
+                if (selected_index > 0) selected_index--;
+                break;
+            case 80: // Down arrow
+                if (selected_index < file_count - 1) selected_index++;
+                break;
+            case 13: // Enter
+                if (file_count > 0) {
+                    char* selected = file_list[selected_index];
+
+                    // Check if it's a directory
+                    if (selected[0] == '[' && selected[strlen(selected) - 1] == ']') {
+                        // It's a directory - enter it
+                        char dir_name[256];
+                        strncpy(dir_name, selected + 1, strlen(selected) - 2);
+                        dir_name[strlen(selected) - 2] = '\0';
+
+                        // Change to subdirectory
+                        char new_dir[256];
+                        sprintf(new_dir, "%s\\%s", current_dir, dir_name);
+                        strcpy(current_dir, new_dir);
+
+                        // Reset selection and restart
+                        selected_index = 0;
+                        scroll_pos = 0;
+                        done = 1; // Break out and restart
+                        return file_select_ex(NULL, current_dir, ext, show_dirs);
+                    }
+                    else {
+                        // It's a file - return the full path
+                        sprintf(path, "%s\\%s", current_dir, selected);
+                        done = 1;
+                        return 1;
+                    }
+                }
+                break;
+            case 27: // Escape
+                return 0;
+            }
+
+            // Redisplay
+            system("cls");
+            printf("\n=== FILE SELECTION: %s ===\n", title);
+            printf("Current directory: %s\n", current_dir);
+            printf("Files and directories:\n");
+
+            for (int i = 0; i < file_count; i++) {
+                printf("%c %2d. %s\n", (i == selected_index) ? '>' : ' ', i, file_list[i]);
+            }
+            printf("\n");
+            printf("Use UP/DOWN arrows to select, ENTER to choose, ESC to cancel\n");
+        }
+    }
+
+    // Cleanup
+    for (int i = 0; i < file_count; i++) free(file_list[i]);
+    free(file_list);
+    file_list = NULL;
+
+    return 1;
+}
+
 int file_select(const char* title, char* path, const char* ext) {
     // Simple file selector - in a real implementation, use native dialog
     printf("File select: %s\n", title);
     printf("Path: %s\n", path);
     printf("Ext: %s\n", ext);
-    return 1; // Assume user selected a file
+    return file_select_ex(title, path, ext, 1); // Show directories by default
+   // return 1; // Assume user selected a file
 }
 
 int exists(const char* filename) {
@@ -2371,7 +2561,7 @@ void set_mouse_sprite(MYBITMAP* sprite) {
                 Uint8 r = (color.r * 255) / 63;
                 Uint8 g = (color.g * 255) / 63;
                 Uint8 b = (color.b * 255) / 63;
-                pixel_color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+                pixel_color = (0xFF << 24) | (b << 16) | (g << 8) | r;
             }
 
             // Set pixel (this is slow but cursers are small)
@@ -2451,7 +2641,7 @@ void SDL_Flip(void) {
             Uint8 r = (color.r * 255) / 63;
             Uint8 g = (color.g * 255) / 63;
             Uint8 b = (color.b * 255) / 63;
-            palette_rgb[i] = (0xFF << 24) | (r << 16) | (g << 8) | b;
+            palette_rgb[i] = (0xFF << 24) | (b << 16) | (g << 8) | r;
         }
         palette_dirty = 0;
     }

@@ -1,9 +1,73 @@
-﻿  HELP.C
+﻿  ANIMVIEW.C
+  BITMAPED.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\BITMAPED.C(45,6): warning C4101: 'c': unreferenced local variable
+  BMPDISP.C
+  BUTTON.C
+  DRIVSEL.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\DRIVSEL.C(291,5): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+  GUIPAL.C
+  SPRTPLTE.C
+  UTIL.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\UTIL.C(110,13): warning C4013: '_stricmp' undefined; assuming extern returning int
+  PACMAN.C
+  AGE_MAP.C
+  ALLEGRO.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1534,13): warning C4013: 'kbhit' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1535,23): warning C4013: 'getch' undefined; assuming extern returning int
+  ANIMATE.C
+  CODING.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\CODING.C(593,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\CODING.C(594,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\CODING.C(595,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\CODING.C(596,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  CONFIG.C
+  DLG.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(123,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(124,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(125,22): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(127,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(198,6): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(489,3): warning C4013: 'initialize_default_sprite' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\DLG.C(554,64): warning C4090: 'initializing': different 'const' qualifiers
+  EDITMENU.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\EDITMENU.C(617,4): warning C4013: 'object_message' undefined; assuming extern returning int
+  EDITMODE.C
+  FILEIO.C
+  FONT.C
+  GAMEDESC.C
+  Compiling...
+  HELP.C
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\HELP.C(65,5): warning C4013: 'do_dialog' undefined; assuming extern returning int
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\HELP.C(73,5): warning C4013: 'alert' undefined; assuming extern returning int
+  ILOAD.C
+  INIDRIV.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(268,96): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(268,96): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(279,96): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(279,96): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(426,82): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(426,82): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(764,38): warning C4028: formal parameter 1 different from declaration
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(764,59): warning C4028: formal parameter 2 different from declaration
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(764,81): warning C4028: formal parameter 4 different from declaration
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.C(898,5): warning C4013: '_mkdir' undefined; assuming extern returning int
+  LIFE.C
+  LIST.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\LIST.C(150,2): warning C4013: 'qsort' undefined; assuming extern returning int
+  WINTURACO.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(275,5): warning C4013: 'tools_paint' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(480,40): warning C4013: 'show_dropdown_menu' undefined; assuming extern returning int
+  MAPED.C
+  PALETTE.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\PALETTE.C(469,2): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+  SNAP.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\SNAP.C(34,38): warning C4133: 'function': incompatible types - from 'char [9]' to 'LPCWSTR'
+  SPRITE.C
+  TEXTED.C
+  TOOLMENU.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\TOOLMENU.C(108,2): warning C4013: 'draw_sprite_ex' undefined; assuming extern returning int
   Generating code
-  31 of 303 functions (10.2%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    6 functions had inline decision re-evaluated but remain unchanged
+  Previous IPDB not found, fall back to full compilation.
+  All 304 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   WinTuraco.vcxproj -> C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\Release\WinTuraco.exe
