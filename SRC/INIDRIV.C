@@ -416,6 +416,7 @@ BOOL ReadColourPalettes(void)
     for (;;)
     {
         char PaletteNum[12];
+        char msg[100];
         int NumCols = 0;
         int Index;
 
@@ -437,8 +438,10 @@ BOOL ReadColourPalettes(void)
         if (NumColPalettes[Index] == 0)
         {
             // no default therefore it doesn't belong to this graphics set
-            DisplayError("Palettes Corrupt, Cols = %d, %d", NumCols, Index);
-            return FALSE;
+           // DisplayError("Palettes Corrupt, Cols = %d, %d", NumCols, Index);
+            sprintf(msg, "Palettes Corrupt, Cols = %d, %d\n", NumCols, Index);
+            printf(msg);
+            //return FALSE;
         }
 
         // are there the right number of colours?
@@ -446,8 +449,10 @@ BOOL ReadColourPalettes(void)
         {
             // each colour should have 3 values. The ini file should store
             // the numcolours followed by the 3 * numcolours for each rgb
-            DisplayError("Palettes Corrupt, palette_count = %d", palette_count);
-            return FALSE;
+           // DisplayError("Palettes Corrupt, palette_count = %d", palette_count);
+            sprintf(msg, "Palettes Corrupt, palette_count = %d", palette_count);
+            printf(msg);
+          //  return FALSE;
         }
 
 
