@@ -1,0 +1,1 @@
+int generate_vector_c_code(void);

@@ -7,13 +7,15 @@ C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\BITMAPED
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\DRIVSEL.C(291,5): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
   GUIPAL.C
   SPRTPLTE.C
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\SPRTPLTE.C(227,51): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
   UTIL.C
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\GUI\UTIL.C(110,13): warning C4013: '_stricmp' undefined; assuming extern returning int
   PACMAN.C
   AGE_MAP.C
   ALLEGRO.C
-C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1534,13): warning C4013: 'kbhit' undefined; assuming extern returning int
-C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1535,23): warning C4013: 'getch' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1243,43): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1688,13): warning C4013: 'kbhit' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\ALLEGRO.C(1689,23): warning C4013: 'getch' undefined; assuming extern returning int
   ANIMATE.C
   CODING.C
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\CODING.C(593,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
@@ -55,8 +57,8 @@ C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\INIDRIV.
   LIST.C
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\LIST.C(150,2): warning C4013: 'qsort' undefined; assuming extern returning int
   WINTURACO.C
-C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(275,5): warning C4013: 'tools_paint' undefined; assuming extern returning int
-C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(480,40): warning C4013: 'show_dropdown_menu' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(276,5): warning C4013: 'tools_paint' undefined; assuming extern returning int
+C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\WINTURACO.C(493,40): warning C4013: 'show_dropdown_menu' undefined; assuming extern returning int
   MAPED.C
   PALETTE.C
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\PALETTE.C(469,2): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
@@ -68,6 +70,6 @@ C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\SNAP.C(3
 C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\SRC\TOOLMENU.C(108,2): warning C4013: 'draw_sprite_ex' undefined; assuming extern returning int
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 304 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 311 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   WinTuraco.vcxproj -> C:\Users\robin\Documents\Vector_monitor_project\WinTuraco\WinTuraco\Release\WinTuraco.exe

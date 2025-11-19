@@ -1,0 +1,74 @@
+﻿  ANIMVIEW.C
+  BITMAPED.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\GUI\BITMAPED.C(45,6): warning C4101: 'c': unreferenced local variable
+  BMPDISP.C
+  BUTTON.C
+  DRIVSEL.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\GUI\DRIVSEL.C(291,5): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+  GUIPAL.C
+  SPRTPLTE.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\GUI\SPRTPLTE.C(227,51): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+  UTIL.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\GUI\UTIL.C(110,13): warning C4013: '_stricmp' undefined; assuming extern returning int
+  PACMAN.C
+  AGE_MAP.C
+  ALLEGRO.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\ALLEGRO.C(1243,43): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\ALLEGRO.C(1688,13): warning C4013: 'kbhit' undefined; assuming extern returning int
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\ALLEGRO.C(1689,23): warning C4013: 'getch' undefined; assuming extern returning int
+  ANIMATE.C
+  CODING.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\CODING.C(593,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\CODING.C(594,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\CODING.C(595,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\CODING.C(596,8): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+  CONFIG.C
+  DLG.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(123,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(124,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(125,22): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(127,23): warning C4090: 'initializing': different 'const' qualifiers
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(198,6): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(489,3): warning C4013: 'initialize_default_sprite' undefined; assuming extern returning int
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\DLG.C(554,64): warning C4090: 'initializing': different 'const' qualifiers
+  EDITMENU.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\EDITMENU.C(617,4): warning C4013: 'object_message' undefined; assuming extern returning int
+  EDITMODE.C
+  FILEIO.C
+  FONT.C
+  GAMEDESC.C
+  Generating Code...
+  Compiling...
+  HELP.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\HELP.C(65,5): warning C4013: 'do_dialog' undefined; assuming extern returning int
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\HELP.C(73,5): warning C4013: 'alert' undefined; assuming extern returning int
+  ILOAD.C
+  INIDRIV.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(268,96): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(268,96): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(279,96): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(279,96): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(426,82): warning C4047: 'function': 'int *' differs in levels of indirection from 'int'
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(426,82): warning C4024: 'get_config_int_array': different types for formal and actual parameter 4
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(764,38): warning C4028: formal parameter 1 different from declaration
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(764,59): warning C4028: formal parameter 2 different from declaration
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(764,81): warning C4028: formal parameter 4 different from declaration
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\INIDRIV.C(898,5): warning C4013: '_mkdir' undefined; assuming extern returning int
+  LIFE.C
+  LIST.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\LIST.C(150,2): warning C4013: 'qsort' undefined; assuming extern returning int
+  WINTURACO.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\WINTURACO.C(276,5): warning C4013: 'tools_paint' undefined; assuming extern returning int
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\WINTURACO.C(493,40): warning C4013: 'show_dropdown_menu' undefined; assuming extern returning int
+  MAPED.C
+  PALETTE.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\PALETTE.C(469,2): warning C4013: 'textprintf_ex' undefined; assuming extern returning int
+  SNAP.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\SNAP.C(34,38): warning C4133: 'function': incompatible types - from 'char [9]' to 'LPCWSTR'
+  SPRITE.C
+  TEXTED.C
+  TOOLMENU.C
+C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\SRC\TOOLMENU.C(108,2): warning C4013: 'draw_sprite_ex' undefined; assuming extern returning int
+  Generating Code...
+ANIMVIEW.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+  WinTuraco.vcxproj -> C:\Users\robin\Downloads\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Turaco-Sprite-Editor-d6b5253931602a2663f5685c49ffd8154b4322a5\Debug\WinTuraco.exe
