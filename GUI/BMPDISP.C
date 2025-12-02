@@ -39,7 +39,7 @@ extern volatile int mouse_x;
 extern volatile int mouse_y;
 
 extern MYBITMAP* create_bitmap(int width, int height);
-extern void show_mouse(MYBITMAP* bmp);
+extern void show_mouse(MYBITMAP* bmp, const char *caller);
 extern void text_mode(int mode);
 
 /* custom dialog procedure for the bitmap display object */
@@ -174,9 +174,9 @@ int bitmap_display_proc(int msg, DIALOG *d, int c)
 	    bds->lmy = mouse_y;
 	}
 	not_busy();
-	show_mouse(NULL);
+	show_mouse(NULL, "bitmap_display_proc 1");
 	SEND_MESSAGE(d, MSG_DRAW, 0);
-	show_mouse(screen);
+	show_mouse(screen, "bitmap_display_proc 2");
 	break; 
 
     case MSG_LOSTFOCUS:
@@ -189,9 +189,9 @@ int bitmap_display_proc(int msg, DIALOG *d, int c)
 	    bds->lmx = bds->lmy = -1;
 	}
         not_busy();
-	show_mouse(NULL);
+	show_mouse(NULL, "bitmap_display_proc 3");
 	SEND_MESSAGE(d, MSG_DRAW, 0);
-	show_mouse(screen);
+	show_mouse(screen, "bitmap_display_proc 4");
 	break; 
 
     case MSG_GOTFOCUS:
@@ -243,9 +243,9 @@ int bitmap_display_proc(int msg, DIALOG *d, int c)
 
 		if (c)
 		{
-		    show_mouse(NULL);
+		    show_mouse(NULL, "bitmap_display_proc 5");
 		    SEND_MESSAGE(d, MSG_DRAW, 0);
-		    show_mouse(screen);
+		    show_mouse(screen, "bitmap_display_proc 6");
 		}
 	    }
 	} else {
@@ -257,9 +257,9 @@ int bitmap_display_proc(int msg, DIALOG *d, int c)
 		{
 		    not_busy();
 		    bds->lmx = bds->lmy = -1;
-		    show_mouse(NULL);
+		    show_mouse(NULL, "bitmap_display_proc 7");
 		    SEND_MESSAGE(d, MSG_DRAW, 0);
-		    show_mouse(screen);
+		    show_mouse(screen, "bitmap_display_proc 8");
 		}
 	    }
 	}
@@ -311,9 +311,9 @@ int bitmap_display_proc(int msg, DIALOG *d, int c)
 
 	    if (!c)  // if we used the character...
 	    {
-		show_mouse(NULL);
+		show_mouse(NULL, "bitmap_display_proc 9");
 		SEND_MESSAGE(d, MSG_DRAW, 0);
-		show_mouse(screen);
+		show_mouse(screen, "bitmap_display_proc 10");
 		return (D_USED_CHAR);  // eat it.
 	    }
 	}

@@ -48,3 +48,4 @@ void do_tool(int selection, MYBITMAP * CurrentChar, int x, int y);
 // used by orientation code in coding and decoding romsets
 void tools_flip(MYBITMAP * CurChar, int direction);
 void tools_cw_rotate(MYBITMAP * CurChar);
+void tools_paint(MYBITMAP* CurChar, int x, int y, int fgbg);

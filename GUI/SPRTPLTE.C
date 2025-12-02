@@ -146,14 +146,14 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
                 spm->flags = SPRITE_FLAG_NEW;
         }
 
-        d->dp3 = malloc(sizeof(struct _sprite_palette_internals));
+        d->dp3 = SAFE_MALLOC(sizeof(struct _sprite_palette_internals));
         bi = d->dp3;
         bi->hilite = COLOR_LOLITE;
         break;
 
         /* shutdown when we get an end message */
     case MSG_END:
-        free(d->dp3);
+        SAFE_FREE(d->dp3);
         break;
 
     case MSG_ANIM_POS_SET:
@@ -224,7 +224,7 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
                     if (adjusted_max_first < 0) adjusted_max_first = 0;
 
                     float visible_ratio = (float)max_visible_sprites / total_sprites;
-                    int thumb_height = (d->h - 4) * visible_ratio;
+                    int thumb_height = (int)((float)(d->h - 4) * visible_ratio);
                     if (thumb_height < 16) thumb_height = 16;
 
                     float scroll_ratio = 0.0;
@@ -459,17 +459,17 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
     case MSG_GOTMOUSE:
         bi = d->dp3;
         bi->hilite = COLOR_HILITE;
-        show_mouse(NULL);
+        show_mouse(NULL, "sprite_palette_proc 1");
         SEND_MESSAGE(d, MSG_DRAW, 0);
-        show_mouse(screen);
+        show_mouse(screen, "sprite_palette_proc 2");
         break;
 
     case MSG_LOSTMOUSE:
         bi = d->dp3;
         bi->hilite = COLOR_LOLITE;
-        show_mouse(NULL);
+        show_mouse(NULL, "sprite_palette_proc 3");
         SEND_MESSAGE(d, MSG_DRAW, 0);
-        show_mouse(screen);
+        show_mouse(screen, "sprite_palette_proc 4");
         break;
 
     case MSG_GOTFOCUS:
@@ -524,9 +524,9 @@ int sprite_palette_proc(int msg, DIALOG* d, int c)
         if (c == (KEY_G << 8)) {         // alt+letter
             ;
         }
-        show_mouse(NULL);
+        show_mouse(NULL, "sprite_palette_proc 5");
         SEND_MESSAGE(d, MSG_DRAW, 0);
-        show_mouse(screen);
+        show_mouse(screen, "sprite_palette_proc 6");
         break;
     }
 

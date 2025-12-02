@@ -9,7 +9,7 @@ extern MYBITMAP * cursor;
 extern MYBITMAP * busy_cursor;
 extern MYBITMAP * flood_cursor;
 extern MYBITMAP * eye_cursor;
-
+extern int current_sprite_index;
 
 void Init_Cursors(void);
 void DeInit_Cursors(void);
@@ -37,10 +37,10 @@ extern int edit_mode_old;
 // if the order of these are changed, there might be 
 // some odd behavior or wierd graphics anomalies.
 #define SET_CURSOR(w,x,y) \
-	show_mouse(NULL); \
+	show_mouse(NULL, "SET_CURSOR 1"); \
 	set_mouse_sprite(w);  \
 	set_mouse_sprite_focus(x,y); \
-	show_mouse(screen);
+	show_mouse(screen, "SET_CURSOR 2");
 
 #define REGULAR_CURSOR() \
 	SET_CURSOR(cursor, 0, 0);

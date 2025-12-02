@@ -46,6 +46,7 @@ extern volatile int mouse_y;
 
 extern MYBITMAP* create_bitmap(int width, int height);
 extern void text_mode(int mode);
+int ultra_safe_menu_execute(MENU* menu_item);
 extern int d_menu_proc(int msg, DIALOG* d, int c);
 extern int button_dp2_proc(int msg, DIALOG* d, int c);
 
@@ -64,7 +65,7 @@ int stub(void) { return D_O_K; }
 ///  The Menus...
 //
 
-const MENU file_menu[] =
+MENU file_menu[] =
 {
     {"&Change Game", 	file_game, NULL, 0, NULL},
     {"", 		NULL, NULL, 0, NULL},
@@ -80,7 +81,7 @@ const MENU file_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-const MENU edit_menu[] =
+MENU edit_menu[] =
 {
 //    {"&Undo", 		edit_undo, NULL, D_DISABLED, NULL},
 //    {"&Redo", 		edit_redo, NULL, D_DISABLED, NULL},
@@ -101,7 +102,7 @@ const MENU edit_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-const MENU mode_menu[] =
+MENU mode_menu[] =
 {
     {"&p Paint",         edit_mode_paint, NULL, 0, NULL},
     {"&f Flood Fill",    edit_mode_flood, NULL, 0, NULL},
@@ -110,7 +111,7 @@ const MENU mode_menu[] =
 };
 
 
-const MENU help_menu[] =
+MENU help_menu[] =
 {
     {"&Readme",	      help_general, NULL, 0, NULL},
     {"&What's New",   help_new, NULL, 0, NULL},
@@ -118,7 +119,7 @@ const MENU help_menu[] =
     {NULL, NULL, NULL, 0, NULL},
 };
 
-const MENU main_menus[] =
+MENU main_menus[] =
 {
     {"&File", 		NULL, file_menu,  0, NULL},
     {"&Edit", 		NULL, edit_menu,  0, NULL},
@@ -142,7 +143,7 @@ void DisplayGameDescription(int x, int y)
     // does text fit in area provided - if not then truncate it and add elipses
     if (strlen(GameDescription) > 22)
     {
-	strncpy(TruncatedName, GameDescription, 20);
+	safe_strncpy(TruncatedName, GameDescription, 20);
 	TruncatedName[20] = '\0';
 	strcat(TruncatedName, "...");
 	textout(screen, font, TruncatedName, x, y, GUI_FORE);
@@ -156,6 +157,7 @@ void DisplayGameDescription(int x, int y)
 extern int timer_ticks;
 int last_timer = 0;
 
+extern BOOL palette_needs_reinit;
 
 int screen_text(int msg, DIALOG *d, int c)
 {
@@ -178,18 +180,26 @@ int screen_text(int msg, DIALOG *d, int c)
 	    {
 		cursor_over_old = GfxBanks[currentGfxBank].last_selected;
 		mouse_over_old = GfxBanks[currentGfxBank].mouse_over;
-		show_mouse(NULL);
+		show_mouse(NULL, "screen_text 1");
 		(void)screen_text(MSG_DRAW, d, c);
 
 		main_dialog[11].proc(MSG_DRAW, &main_dialog[11], c);
 
-		show_mouse(screen);
+		show_mouse(screen, "screen_text 2");
 	    }
 
     }
 
     if (msg == MSG_DRAW)
     {
+
+		// Check if palette needs reinitialization
+		if (palette_needs_reinit) {
+			printf("DEBUG: Reinitializing palette from main dialog\n");
+			Init_Palette();
+			palette_needs_reinit = FALSE;
+			return D_REDRAW; // Force redraw after palette init
+		}
 	// draw up all of the text onto the screen...
 	text_mode(GUI_BACK);
 
@@ -392,25 +402,25 @@ int my_kyb(int msg, DIALOG *d, int c)
 	{
 	    life_counter=0l;
 
-	    show_mouse(NULL);
+	    show_mouse(NULL, "my_kyb 1");
 	    text_mode(GUI_BACK);
 	    textprintf(screen, font, 261, 4, GUI_FORE, 
 		       "%07ld ", life_counter);
-	    show_mouse(screen);
+	    show_mouse(screen, "my_kyb 2");
 	}
 
 	if((SCANCODE_TO_KEY(KEY_F12)) == c)
 	{
 	    if (do_life() == D_REDRAW)
 	    {
-		show_mouse(NULL);
+		show_mouse(NULL, "my_kyb 3");
 		main_dialog[2].proc(MSG_DRAW, &main_dialog[2], 0);
 
 		text_mode(GUI_BACK);
 		textprintf(screen, font, 261, 4, GUI_FORE, 
 			   "%07ld ", life_counter);
 
-		show_mouse(screen);
+		show_mouse(screen, "my_kyb 4");
 	    }
 	}
 

@@ -52,7 +52,7 @@ void fst_callback(char * fname, int attrib, int param)
         sprintf(fst[fst_count].filename, fname);
 
 	pBuffer = get_filename(fname);
-	strncpy(fst[fst_count].gamename_short, pBuffer, 32);
+	safe_strncpy(fst[fst_count].gamename_short, pBuffer, 32);
 
 	fst[fst_count].dir = fst_cdir;
 
@@ -69,7 +69,7 @@ void fst_callback(char * fname, int attrib, int param)
 	    pBuffer = get_config_string("General", "Description", "None");
 	    if (strcmp(pBuffer, "None"))
 	    {
-		strncpy(fst[fst_count].gamename_long, pBuffer, 126);
+		safe_strncpy(fst[fst_count].gamename_long, pBuffer, 126);
 		GameDescription[126] = 0;
 	    } else {
 		sprintf(fst[fst_count].gamename_long, "Badly formatted file.");
@@ -134,8 +134,8 @@ void create_fst_list(int task)
     }
 
 
-    if (fst)  free(fst);
-    fst = (FILE_ST *) malloc(sizeof(FILE_ST) * fst_total);
+    if (fst)  SAFE_FREE(fst);
+    fst = (FILE_ST *) SAFE_MALLOC(sizeof(FILE_ST) * fst_total);
     if (fst)
     {
 	fst_count = 0;
@@ -153,7 +153,7 @@ void create_fst_list(int task)
 
 void destroy_fst_list(void)
 {
-    if(fst) free(fst);
+    if(fst) SAFE_FREE(fst);
     destroy_dir_list();
 }
 

@@ -11,9 +11,10 @@
 // encodes the oldbank and decodes the new. if the oldbank
 // is -1 then no encoding done.
 void SwitchGraphicsBank(int oldbank, int newbank);
-
+int GetBit(long startbit);
+void Encode(int CurrentBank);
 
 // for before we save....
 
-#define Commit_Graphics_Bank() \
-	SwitchGraphicsBank(currentGfxBank, currentGfxBank);
+//#define Commit_Graphics_Bank() \
+//	SwitchGraphicsBank(currentGfxBank, currentGfxBank);

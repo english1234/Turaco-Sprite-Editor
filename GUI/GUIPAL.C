@@ -18,18 +18,42 @@ extern MYBITMAP* screen;          // Main display bitmap
 extern volatile int mouse_x;
 extern volatile int mouse_y;
 
-MYBITMAP* create_bitmap(int width, int height) {
-//	printf("Creating bitmap: %dx%d\n", width, height);
+// Global counter for memory tracking (optional)
+static int bitmap_count = 0;
 
-	MYBITMAP* bmp = malloc(sizeof(MYBITMAP));
-	if (!bmp) {
-		printf("Failed to allocate MYBITMAP structure\n");
+MYBITMAP* create_bitmap(int width, int height) {
+	bitmap_count++;
+	//printf("Creating bitmap #%d: %dx%d\n", bitmap_count, width, height);
+
+	// Validate dimensions
+	if (width <= 0 || height <= 0) {
+		printf("ERROR: Invalid bitmap dimensions: %dx%d\n", width, height);
+		bitmap_count--;
 		return NULL;
 	}
 
-	// Initialize all fields to zero first
-	memset(bmp, 0, sizeof(MYBITMAP));
+	size_t data_size = (size_t)width * height;
+	if (data_size == 0) {
+		printf("ERROR: Zero-sized bitmap requested\n");
+		bitmap_count--;
+		return NULL;
+	}
 
+	// Check for reasonable limits
+	if (width > 8192 || height > 8192) {
+		printf("WARNING: Unusually large bitmap: %dx%d\n", width, height);
+	}
+
+	// Allocate MYBITMAP structure
+	MYBITMAP* bmp = SAFE_MALLOC(sizeof(MYBITMAP));
+	if (!bmp) {
+		printf("ERROR: SAFE_MALLOC( failed for MYBITMAP structure\n");
+		bitmap_count--;
+		return NULL;
+	}
+
+	// Initialize structure
+	SDL_memset(bmp, 0, sizeof(MYBITMAP));
 	bmp->w = width;
 	bmp->h = height;
 	bmp->clip = 1;
@@ -39,20 +63,22 @@ MYBITMAP* create_bitmap(int width, int height) {
 	bmp->cb = height - 1;
 
 	// Allocate pixel data
-	bmp->dat = malloc(width * height);
+	bmp->dat = SAFE_MALLOC(data_size);
 	if (!bmp->dat) {
-		printf("Failed to allocate pixel data\n");
-		free(bmp);
+		printf("ERROR: SAFE_MALLOC( failed for %zu bytes of pixel data\n", data_size);
+		SAFE_FREE(bmp);
+		bitmap_count--;
 		return NULL;
 	}
-	memset(bmp->dat, 0, width * height); // Initialize to zero
+	SDL_memset(bmp->dat, 0, data_size);
 
 	// Allocate line pointers
-	bmp->line = malloc(height * sizeof(unsigned char*));
+	bmp->line = SAFE_MALLOC(height * sizeof(unsigned char*));
 	if (!bmp->line) {
-		printf("Failed to allocate line pointers\n");
-		free(bmp->dat);
-		free(bmp);
+		printf("ERROR: SAFE_MALLOC failed for line pointers\n");
+		SAFE_FREE(bmp->dat);
+		SAFE_FREE(bmp);
+		bitmap_count--;
 		return NULL;
 	}
 
@@ -61,15 +87,36 @@ MYBITMAP* create_bitmap(int width, int height) {
 		bmp->line[y] = (unsigned char*)bmp->dat + (y * width);
 	}
 
-//	printf("Bitmap created successfully at %p\n", bmp);
+	//printf("Bitmap #%d created successfully at %p\n", bitmap_count, bmp);
 	return bmp;
 }
 
 void destroy_bitmap(MYBITMAP* bmp) {
 	if (bmp) {
-		if (bmp->dat) free(bmp->dat);
-		if (bmp->line) free(bmp->line);
-		free(bmp);
+		bitmap_count--;
+		//printf("Destroying bitmap at %p, remaining: %d\n", bmp, bitmap_count);
+
+		// Enhanced safety checks
+		if ((uintptr_t)bmp < 0x10000 || (uintptr_t)bmp > 0xFFFFFFFF) {
+			printf("WARNING: Suspicious bitmap pointer: %p\n", bmp);
+			return;
+		}
+
+		if (bmp->dat && (uintptr_t)bmp->dat >= 0x10000 && (uintptr_t)bmp->dat <= 0xFFFFFFFF) {
+			SAFE_FREE(bmp->dat);
+		}
+		else {
+			printf("WARNING: Invalid dat pointer in bitmap: %p\n", bmp->dat);
+		}
+
+		if (bmp->line && (uintptr_t)bmp->line >= 0x10000 && (uintptr_t)bmp->line <= 0xFFFFFFFF) {
+			SAFE_FREE(bmp->line);
+		}
+		else {
+			printf("WARNING: Invalid line pointer in bitmap: %p\n", bmp->line);
+		}
+
+		SAFE_FREE(bmp);
 	}
 }
 
@@ -170,9 +217,9 @@ int pal_display_proc(int msg, DIALOG *d, int c)
 	    d->d1 = *fg;
 	    d->d2 = *bg;
 
-	    show_mouse(NULL);
+	    show_mouse(NULL, "pal_display_proc 1");
 	    SEND_MESSAGE(d, MSG_DRAW, 0);
-	    show_mouse(screen);
+	    show_mouse(screen, "pal_display_proc 2");
 	}
     }
 
@@ -401,16 +448,16 @@ int pal_select_proc(int msg, DIALOG *d, int c)
 
     case MSG_GOTMOUSE:
 	d->d2 = COLOR_HILITE;
-	show_mouse(NULL);
+	show_mouse(NULL, "pal_select_proc 1");
 	SEND_MESSAGE(d, MSG_DRAW, 0);
-	show_mouse(screen);
+	show_mouse(screen, "pal_select_proc 2");
 	break; 
 
     case MSG_LOSTMOUSE:
 	d->d2 = COLOR_LOLITE;
-	show_mouse(NULL);
+	show_mouse(NULL, "pal_select_proc 3");
 	SEND_MESSAGE(d, MSG_DRAW, 0);
-	show_mouse(screen);
+	show_mouse(screen, "pal_select_proc 4");
 	break; 
 
     case MSG_GOTFOCUS:

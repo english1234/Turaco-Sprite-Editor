@@ -6,6 +6,7 @@
 //  jerry@mail.csh.rit.edu
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "../INCLUDE/allegro.h"
 #include "../INCLUDE/general.h"
 #include "../INCLUDE/editmode.h"
@@ -21,6 +22,7 @@ MYBITMAP * null_cursor;
 // for the paint mode...
 int edit_mode = MODE_PAINT;
 int edit_mode_old = MODE_PAINT;
+int current_sprite_index = 0;  // Default to first sprite
 
 extern MYBITMAP* screen;          // Main display bitmap
 extern FONT* font;              // Default system font
@@ -184,12 +186,12 @@ void empty_cursor(void)
 
 void not_busy(void)
 {
-    if (edit_mode == MODE_PAINT)
-    {
+	printf("=== NOT_BUSY START ===\n");
+	check_all_allocations("before not_busy");
+
+	//show_mouse(screen, "not_busy");
 	REGULAR_CURSOR();
-    } else if (edit_mode == MODE_FLOODFILL) {
-	FLOOD_CURSOR();
-    } else if (edit_mode == MODE_EYEDROP){
-	EYE_CURSOR();
-    }
+
+	check_all_allocations("after not_busy");
+	printf("=== NOT_BUSY END ===\n");
 }

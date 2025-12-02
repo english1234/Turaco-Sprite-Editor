@@ -31,9 +31,9 @@ extern void text_mode(int mode);
 void bitmaped_free_tables(struct _bitmap_editor_internals* bi)
 {
 	if (bi->xscal)
-		free(bi->xscal);
+		SAFE_FREE(bi->xscal);
 	if (bi->yscal)
-		free(bi->yscal);
+		SAFE_FREE(bi->yscal);
 	bi->xscal = NULL;
 	bi->yscal = NULL;
 }
@@ -42,7 +42,7 @@ void bitmaped_generate_tables(MYBITMAP* bmp,
 	DIALOG* d,
 	struct _bitmap_editor_internals* bi)
 {
-	int c;
+	//int c;
 
 	if (bi == NULL) return;
 
@@ -52,8 +52,8 @@ void bitmaped_generate_tables(MYBITMAP* bmp,
 	int canvas_width = d->w - 4;
 	int canvas_height = d->h - 4;
 
-	bi->xscal = (int*)malloc(sizeof(int) * canvas_width);
-	bi->yscal = (int*)malloc(sizeof(int) * canvas_height);
+	bi->xscal = (int*)SAFE_MALLOC(sizeof(int) * canvas_width);
+	bi->yscal = (int*)SAFE_MALLOC(sizeof(int) * canvas_height);
 
 	if (bi->xscal == NULL || bi->yscal == NULL)
 	{
@@ -185,7 +185,7 @@ int bitmap_editor_proc(int msg, DIALOG* d, int c)
 			}
 		}
 
-		d->dp3 = malloc(sizeof(struct _bitmap_editor_internals));
+		d->dp3 = SAFE_MALLOC(sizeof(struct _bitmap_editor_internals));
 		bi = d->dp3;
 		bi->hilite = COLOR_LOLITE;
 		bi->grid = 1;
@@ -209,7 +209,7 @@ int bitmap_editor_proc(int msg, DIALOG* d, int c)
 		if (bi)
 		{
 			bitmaped_free_tables(bi);
-			free(bi);
+			SAFE_FREE(bi);
 			d->dp3 = NULL;
 		}
 		break;
@@ -346,11 +346,11 @@ int bitmap_editor_proc(int msg, DIALOG* d, int c)
 						}
 
 						// Force redraw
-						show_mouse(NULL);
+						show_mouse(NULL, "bitmap_editor_proc 1");
 						SEND_MESSAGE(d, MSG_DRAW, 0);
 						SDL_Flip();
 
-						show_mouse(screen);
+						show_mouse(screen, "bitmap_editor_proc 2");
 
 						lastx = x;
 						lasty = y;
@@ -380,17 +380,17 @@ int bitmap_editor_proc(int msg, DIALOG* d, int c)
 	case MSG_GOTMOUSE:
 		bi = d->dp3;
 		bi->hilite = COLOR_HILITE;
-		show_mouse(NULL);
+		show_mouse(NULL, "bitmap_editor_proc 3");
 		SEND_MESSAGE(d, MSG_DRAW, 0);
-		show_mouse(screen);
+		show_mouse(screen, "bitmap_editor_proc 4");
 		break;
 
 	case MSG_LOSTMOUSE:
 		bi = d->dp3;
 		bi->hilite = COLOR_LOLITE;
-		show_mouse(NULL);
+		show_mouse(NULL, "bitmap_editor_proc 5");
 		SEND_MESSAGE(d, MSG_DRAW, 0);
-		show_mouse(screen);
+		show_mouse(screen, "bitmap_editor_proc 6");
 		break;
 
 	case MSG_GOTFOCUS:
@@ -456,9 +456,9 @@ int bitmap_editor_proc(int msg, DIALOG* d, int c)
 			bi->grid ^= 1;
 			ret = D_USED_CHAR;
 		}
-		show_mouse(NULL);
+		show_mouse(NULL, "bitmap_editor_proc 7");
 		SEND_MESSAGE(d, MSG_DRAW, 0);
-		show_mouse(screen);
+		show_mouse(screen, "bitmap_editor_proc 8");
 		break;
 
 	case MSG_SIZE_CHANGE:

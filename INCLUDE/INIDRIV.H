@@ -6,7 +6,7 @@
 //
 //   Ivan Mackintosh
 
-BOOL LoadDriver(char * INIFileName);
+BOOL LoadDriver(const char * INIFileName);
 void FreeDriver(void);
 BOOL SaveDriver(void);
 void SwitchGraphicsBank(int oldbank, int newbank);
@@ -14,3 +14,5 @@ void MakePatch(void);
 void MergeFiles(char * ROMName, long size);
 void ApplyPatch(void);
 void SaveAllPalettes();
+void DisplayError(const char* pFormatStr, ...);
+int get_config_int_array(const char* section, const char* name, int* array, int max_count);

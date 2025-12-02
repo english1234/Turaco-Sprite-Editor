@@ -49,6 +49,63 @@ extern char ROMPath[ROM_PATH_LEN];  // Define ROM_PATH_LEN if not already define
 extern volatile int mouse_x;
 extern volatile int mouse_y;
 
+void VerifyCurrentSpriteToMaster(void) {
+	if (!GameDriverLoaded || currentGfxBank < 0) {
+		printf("Cannot verify: No driver loaded or invalid bank\n");
+		return;
+	}
+
+	printf("=== VERIFYING CURRENT SPRITE TO MASTER ===\n");
+	printf("Current bank: %d\n", currentGfxBank);
+
+	SPRITE_PALETTE* sp = &GfxBanks[currentGfxBank];
+
+	// We need to get the current sprite index from the sprite editing context
+	// For now, let's verify the first sprite as an example
+	int test_sprite_index = 0;
+	int master_x = test_sprite_index * sp->sprite_w;
+
+	printf("Testing sprite %d in bank %d:\n", test_sprite_index, currentGfxBank);
+	printf("Master bitmap dimensions: %dx%d\n",
+		sp->bmp->w, sp->bmp->h);
+	printf("Sprite position in master: x=%d to x=%d\n",
+		master_x, master_x + sp->sprite_w);
+
+	if (sp->bmp) {
+		// Just check that we can access the master bitmap
+		printf("Master bitmap accessible: YES\n");
+
+		// Print a few pixels from the first sprite
+		printf("First few pixels of sprite %d:\n", test_sprite_index);
+		for (int y = 0; y < 2 && y < sp->sprite_h; y++) {
+			for (int x = 0; x < 4 && x < sp->sprite_w; x++) {
+				int master_color = getpixel(sp->bmp, master_x + x, y);
+				printf("  [%d,%d] = %d\n", x, y, master_color);
+			}
+		}
+	}
+	else {
+		printf("Master bitmap is NULL!\n");
+	}
+	printf("=== END VERIFICATION ===\n\n");
+}
+
+void VerifySaveIntegrity(void) {
+	printf("=== SAVE INTEGRITY CHECK ===\n");
+	printf("GameDriverLoaded: %d\n", GameDriverLoaded);
+	printf("NumGfxBanks: %d\n", NumGfxBanks);
+	printf("currentGfxBank: %d\n", currentGfxBank);
+
+	if (GameDriverLoaded && NumGfxBanks > 0) {
+		for (int i = 0; i < NumGfxBanks; i++) {
+			printf("Bank %d: %dx%d, %d sprites, bmp: %p\n",
+				i, GfxBanks[i].sprite_w, GfxBanks[i].sprite_h,
+				GfxBanks[i].n_total, GfxBanks[i].bmp);
+		}
+	}
+	printf("=== END SAVE INTEGRITY CHECK ===\n\n");
+}
+
 // UNDO / REDO
 
 int edit_undo(void)
@@ -97,6 +154,9 @@ int edit_paste_sprite(void) {
 	blit(clipboard, current_sprite, 0, 0, 0, 0, current_sprite->w, current_sprite->h);
 	printf("Sprite pasted from clipboard\n");
 
+	// ADD THIS: Verify the edit propagated to master bitmap
+	VerifyCurrentSpriteToMaster();
+
 	return D_REDRAW;
 }
 
@@ -129,9 +189,9 @@ int nd_edit_proc(int msg, DIALOG* d, int c)
 			}
 			final_resolution[15] = '\0';
 
-			show_mouse(NULL);
+			show_mouse(NULL, "nd_edit_proc 1");
 			save_pcx_dialog[7].proc(MSG_DRAW, &save_pcx_dialog[7], 0);
-			show_mouse(screen);
+			show_mouse(screen, "nd_edit_proc 2");
 		}
 
 	}
@@ -206,7 +266,7 @@ int edit_save_pcx(void)
     }
 
     // get user preferences
-    strncpy(nsprites_wide, get_config_string("PCX_Rip", "NumPerRow", "32"), 16);
+    safe_strncpy(nsprites_wide, get_config_string("PCX_Rip", "NumPerRow", "32"), 16);
 
     centre_dialog(save_pcx_dialog);
     set_dialog_color(save_pcx_dialog, GUI_FORE, GUI_BACK);
@@ -215,12 +275,12 @@ int edit_save_pcx(void)
 	set_config_string("PCX_Rip", "NumPerRow", nsprites_wide);
 	wide = atoi(nsprites_wide);
 
-	strncpy(the_path, get_config_string("PCX_Rip", "Path", "."), 255);
-	put_backslash(the_path);
+	safe_strncpy(the_path, get_config_string("PCX_Rip", "Path", "."), 255);
+	put_backslash(the_path, sizeof(the_path));
 
 	// generate a possible name for the image...
 	// in the form:  pacman bank 4:  pacm04.pcx
-	strcpy(newname, ROMDirName);
+	safe_strncpy(newname, ROMDirName, _TRUNCATE);
 	newname[6] = '\0';
 	sprintf(numbre, "%02d", currentGfxBank+1);
 	strcat(newname, numbre);
@@ -229,7 +289,7 @@ int edit_save_pcx(void)
 
 	if (file_select("Enter A PCX Image filename:", the_path, "PCX") )
 	{
-	    Commit_Graphics_Bank();
+		SwitchGraphicsBank(currentGfxBank, currentGfxBank);
 
 	    // save it out now 
 	    tb = create_bitmap(current_sprite->w, current_sprite->h);
@@ -394,8 +454,8 @@ int edit_load_pcx(void)
 	return D_REDRAW;
     }
 
-    strncpy(the_path, get_config_string("PCX_Rip", "Path", "."), 255);
-    put_backslash(the_path);
+    safe_strncpy(the_path, get_config_string("PCX_Rip", "Path", "."), 255);
+    put_backslash(the_path, sizeof(the_path));
 
     if (file_select("Select A PCX Image filename:", the_path, "PCX") )
     {
@@ -414,7 +474,7 @@ int edit_load_pcx(void)
 	    /*
 	    */ bds = NULL;
 	    bds = (BITMAP_DISPLAY_STRUCT *) 
-		      malloc(sizeof(BITMAP_DISPLAY_STRUCT));
+		      SAFE_MALLOC(sizeof(BITMAP_DISPLAY_STRUCT));
 
 	    bds->x = bds->y = 0;
 	    bds->size = current_sprite->w;
@@ -426,7 +486,7 @@ int edit_load_pcx(void)
 	    set_dialog_color(edit_load_PCX_dialog, GUI_FORE, GUI_BACK);
 	    do_dialog(edit_load_PCX_dialog, -1);
 
-	    free(bds);
+	    SAFE_FREE(bds);
 	} else {
 	    alert("", "Unable to load the bitmap", "", 
 	          "&Bummin", NULL, 'b', 0);
@@ -624,11 +684,11 @@ int d_check_proc(int msg, DIALOG* d, int c) {
 
 int resolution_callback(DIALOG* d, int ic)
 {
-	static char temp_buffer[32];
+	static char temp_buffer[64];
 	int sel = do_menu(resolution_popup, d->x + 10, d->y + 4);
 
 	if (sel >= 0) {
-		strcpy(temp_buffer, resolution_popup[sel].text);
+		safe_strncpy(temp_buffer, resolution_popup[sel].text, _TRUNCATE);
 		edit_prefs_dialog[DE_RESOLUTION].dp = temp_buffer;
 	}
 

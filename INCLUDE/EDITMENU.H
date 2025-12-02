@@ -14,3 +14,4 @@ int edit_paste_sprite(void);
 int edit_save_pcx(void);
 int edit_load_pcx(void);
 int edit_preferences(void);
+void VerifyCurrentSpriteToMaster(void);

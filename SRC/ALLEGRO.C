@@ -2,6 +2,7 @@
 #include SDL_PATH
 #include <stdio.h>
 #include <windows.h>
+#include <conio.h>
 #include "../INCLUDE/GENERAL.H"
 #include "../INCLUDE/GUIPAL.H"
 #include "../INCLUDE/bitmaped.h"
@@ -25,9 +26,190 @@ extern SDL_Renderer* sdl_renderer;
 extern SDL_Texture* sdl_texture;
 extern Uint32* sdl_pixels;
 
-#ifndef strdup
-#define strdup _strdup
-#endif
+//#ifndef strdup
+//#define strdup _strdup
+//#endif
+
+// Memory guard values
+#define GUARD_VALUE 0xDEADBEEF
+#define FREED_MEMORY_PATTERN 0xDDDDDDDD
+
+// Structure to track allocations
+typedef struct {
+    void* ptr;
+    size_t size;
+    const char* file;
+    int line;
+    uint32_t guard_before;
+    uint32_t guard_after;
+} MemoryBlock;
+
+#define MAX_TRACKED_BLOCKS 10000
+static MemoryBlock tracked_blocks[MAX_TRACKED_BLOCKS];
+static int tracked_count = 0;
+
+// Safe string copy with bounds checking
+char *safe_strncpy(char* dest, const char* src, size_t dest_size) {
+    if (!dest || dest_size == 0) return dest;
+
+    dest[0] = '\0';
+    if (src) {
+        strncpy(dest, src, dest_size - 1);
+        dest[dest_size - 1] = '\0';
+    }
+
+    return dest;
+}
+// Safe allocation wrapper
+void* debug_malloc(size_t size, const char* file, int line) {
+    if (size == 0) {
+        printf("WARNING: Zero-size allocation at %s:%d\n", file, line);
+        return NULL;
+    }
+
+    // Allocate extra space for guards
+    size_t total_size = size + sizeof(uint32_t) * 2;
+    void* raw_ptr = SDL_malloc(total_size);
+
+    if (!raw_ptr) {
+        printf("CRITICAL: Allocation failed at %s:%d (size: %zu)\n", file, line, size);
+        return NULL;
+    }
+
+    // Set up guards
+    uint32_t* guard_before = (uint32_t*)raw_ptr;
+    void* user_ptr = (void*)((uint8_t*)raw_ptr + sizeof(uint32_t));
+    uint32_t* guard_after = (uint32_t*)((uint8_t*)user_ptr + size);
+
+    *guard_before = GUARD_VALUE;
+    *guard_after = GUARD_VALUE;
+
+    // Track this allocation
+    if (tracked_count < MAX_TRACKED_BLOCKS) {
+        tracked_blocks[tracked_count].ptr = user_ptr;
+        tracked_blocks[tracked_count].size = size;
+        tracked_blocks[tracked_count].file = file;
+        tracked_blocks[tracked_count].line = line;
+        tracked_blocks[tracked_count].guard_before = GUARD_VALUE;
+        tracked_blocks[tracked_count].guard_after = GUARD_VALUE;
+        tracked_count++;
+    }
+
+   // printf("ALLOC: %p (%zu bytes) at %s:%d\n", user_ptr, size, file, line);
+    return user_ptr;
+}
+
+// Safe free wrapper
+void debug_free(void* ptr, const char* file, int line) {
+    if (!ptr) {
+        printf("WARNING: Attempted to free NULL pointer at %s:%d\n", file, line);
+        return;
+    }
+
+    // Find this allocation
+    int found_index = -1;
+    for (int i = 0; i < tracked_count; i++) {
+        if (tracked_blocks[i].ptr == ptr) {
+            found_index = i;
+            break;
+        }
+    }
+
+    if (found_index == -1) {
+        printf("CRITICAL: Attempted to free untracked pointer %p at %s:%d\n", ptr, file, line);
+        return;
+    }
+
+    MemoryBlock* block = &tracked_blocks[found_index];
+
+    // Check guards
+    void* raw_ptr = (void*)((uint8_t*)ptr - sizeof(uint32_t));
+    uint32_t* guard_before = (uint32_t*)raw_ptr;
+    uint32_t* guard_after = (uint32_t*)((uint8_t*)ptr + block->size);
+
+    if (*guard_before != GUARD_VALUE) {
+        printf("CRITICAL: BUFFER UNDERRUN detected at %p (allocated at %s:%d, freed at %s:%d)\n",
+            ptr, block->file, block->line, file, line);
+        printf("  Guard before: expected 0x%08X, got 0x%08X\n", GUARD_VALUE, *guard_before);
+    }
+
+    if (*guard_after != GUARD_VALUE) {
+        printf("CRITICAL: BUFFER OVERRUN detected at %p (allocated at %s:%d, freed at %s:%d)\n",
+            ptr, block->file, block->line, file, line);
+        printf("  Guard after: expected 0x%08X, got 0x%08X\n", GUARD_VALUE, *guard_after);
+        printf("  Allocation size: %zu bytes\n", block->size);
+
+        // Show the corrupted data
+        printf("  Data after buffer:\n");
+        uint8_t* overflow_data = (uint8_t*)ptr + block->size;
+        for (int i = 0; i < 16; i++) {
+            printf("    [+%d]: 0x%02X\n", i, overflow_data[i]);
+        }
+    }
+
+    // Fill freed memory with pattern
+    SDL_memset(ptr, 0xDD, block->size);
+
+    // Free the raw pointer
+    SDL_free(raw_ptr);
+
+    // Remove from tracking
+    tracked_blocks[found_index] = tracked_blocks[tracked_count - 1];
+    tracked_count--;
+
+ //   printf("FREE: %p at %s:%d\n", ptr, file, line);
+}
+
+char* tracked_strdup(const char* str, const char* file, int line) {
+    if (!str) return NULL;
+
+    size_t len = strlen(str) + 1;
+    char* copy = (char*)debug_malloc(len, file, line);
+    if (copy) {
+        memcpy(copy, str, len);
+    }
+    return copy;
+}
+
+// Check all allocations for corruption
+void check_all_allocations(const char* checkpoint) {
+  //  printf("=== MEMORY CHECK: %s ===\n", checkpoint);
+
+    int corruptions = 0;
+    for (int i = 0; i < tracked_count; i++) {
+        MemoryBlock* block = &tracked_blocks[i];
+        void* raw_ptr = (void*)((uint8_t*)block->ptr - sizeof(uint32_t));
+        uint32_t* guard_before = (uint32_t*)raw_ptr;
+        uint32_t* guard_after = (uint32_t*)((uint8_t*)block->ptr + block->size);
+
+        if (*guard_before != GUARD_VALUE) {
+            printf("CORRUPTION: Buffer underrun at %p (allocated at %s:%d)\n",
+                block->ptr, block->file, block->line);
+            corruptions++;
+        }
+
+        if (*guard_after != GUARD_VALUE) {
+            printf("CORRUPTION: Buffer overrun at %p (allocated at %s:%d, size: %zu)\n",
+                block->ptr, block->file, block->line, block->size);
+            corruptions++;
+        }
+    }
+
+    if (corruptions == 0) {
+    //    printf("Memory check PASSED - no corruptions detected\n");
+    }
+    else {
+        printf("Memory check FAILED - %d corruptions found!\n", corruptions);
+    }
+ //   printf("=== END MEMORY CHECK ===\n");
+}
+
+
+void init_memory_debugging(void) {
+    tracked_count = 0;
+    SDL_memset(tracked_blocks, 0, sizeof(tracked_blocks));
+    printf("Memory debugging initialized\n");
+}
 
 /* --------- Helper functions to reduce duplication --------- */
 
@@ -202,14 +384,14 @@ int d_textbox_proc(int msg, DIALOG* d, int c) {
         // Free old wrapped lines
         if (wrapped_lines) {
             for (int i = 0; i < wrapped_line_count; i++) {
-                free(wrapped_lines[i]);
+                SAFE_FREE(wrapped_lines[i]);
             }
-            free(wrapped_lines);
+            SAFE_FREE(wrapped_lines);
         }
 
         // Count how many wrapped lines we'll need (estimate)
         int estimated_lines = strlen(text) / chars_per_line + 100;
-        wrapped_lines = (char**)malloc(estimated_lines * sizeof(char*));
+        wrapped_lines = (char**)SAFE_MALLOC(estimated_lines * sizeof(char*));
         wrapped_line_count = 0;
 
         // Wrap the text
@@ -235,7 +417,7 @@ int d_textbox_proc(int msg, DIALOG* d, int c) {
             // If we hit a newline or end of string, use that
             if (*line_end == '\n' || *line_end == '\0') {
                 int len = line_end - src;
-                wrapped_lines[wrapped_line_count] = (char*)malloc(len + 1);
+                wrapped_lines[wrapped_line_count] = (char*)SAFE_MALLOC(len + 1);
                 memcpy(wrapped_lines[wrapped_line_count], src, len);
                 wrapped_lines[wrapped_line_count][len] = '\0';
                 wrapped_line_count++;
@@ -244,7 +426,7 @@ int d_textbox_proc(int msg, DIALOG* d, int c) {
             // Otherwise, break at last space if possible
             else if (last_space && last_space > src) {
                 int len = last_space - src;
-                wrapped_lines[wrapped_line_count] = (char*)malloc(len + 1);
+                wrapped_lines[wrapped_line_count] = (char*)SAFE_MALLOC(len + 1);
                 memcpy(wrapped_lines[wrapped_line_count], src, len);
                 wrapped_lines[wrapped_line_count][len] = '\0';
                 wrapped_line_count++;
@@ -253,7 +435,7 @@ int d_textbox_proc(int msg, DIALOG* d, int c) {
             // No space found, hard break
             else {
                 int len = line_end - src;
-                wrapped_lines[wrapped_line_count] = (char*)malloc(len + 1);
+                wrapped_lines[wrapped_line_count] = (char*)SAFE_MALLOC(len + 1);
                 memcpy(wrapped_lines[wrapped_line_count], src, len);
                 wrapped_lines[wrapped_line_count][len] = '\0';
                 wrapped_line_count++;
@@ -368,9 +550,9 @@ int d_textbox_proc(int msg, DIALOG* d, int c) {
         // Clean up wrapped lines when dialog closes
         if (wrapped_lines) {
             for (int i = 0; i < wrapped_line_count; i++) {
-                free(wrapped_lines[i]);
+                SAFE_FREE(wrapped_lines[i]);
             }
-            free(wrapped_lines);
+            SAFE_FREE(wrapped_lines);
             wrapped_lines = NULL;
             wrapped_line_count = 0;
             last_width = 0;
@@ -514,14 +696,34 @@ int getpixel(MYBITMAP* bmp, int x, int y) {
 }
 
 // Mouse visibility
-void show_mouse(MYBITMAP* bmp) {
-    // bmp=NULL hides mouse, bmp=screen shows mouse
+void show_mouse(MYBITMAP* bmp, const char* caller) {
+  //  printf("=== SHOW_MOUSE called from %s ===\n", caller);
+
+    // Check memory before SDL call
+    check_all_allocations("before show_mouse");
+
+    // Validate parameters
+    if (bmp != NULL && bmp != screen) {
+        printf("WARNING: show_mouse called with non-screen bitmap: %p\n", bmp);
+    }
+
+    // Check SDL state
+    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+        printf("CRITICAL: SDL video not initialized!\n");
+        return;
+    }
+
+  //  printf("Calling SDL_ShowCursor(%d)\n", bmp == NULL ? SDL_DISABLE : SDL_ENABLE);
+
+    // Call the actual function
     if (bmp == NULL) {
         SDL_ShowCursor(SDL_DISABLE);
     }
     else {
         SDL_ShowCursor(SDL_ENABLE);
     }
+
+ //   printf("=== SHOW_MOUSE completed ===\n");
 }
 
 // Text mode (transparent/solid background)
@@ -1240,7 +1442,7 @@ int d_list_proc(int msg, DIALOG* d, int c) {
 
             // Calculate thumb size and position
             float visible_ratio = (float)visible_items / item_count;
-            int thumb_height = (d->h - 2) * visible_ratio;
+            int thumb_height = (int)((float)(d->h - 2) * visible_ratio);
             if (thumb_height < 24) thumb_height = 24; // Minimum thumb size
 
             float scroll_ratio = (float)scroll_pos / (item_count - visible_items);
@@ -1354,13 +1556,14 @@ int d_list_proc(int msg, DIALOG* d, int c) {
         }
         break;
 
-    case MSG_WHEEL:
+    case MSG_WHEEL: {
         /* Mouse wheel scrolling - more responsive */
         int wheel_delta = c * 3; // Scroll 3 items per wheel tick
         scroll_pos -= wheel_delta;
         if (scroll_pos < 0) scroll_pos = 0;
         if (scroll_pos > item_count - visible_items)
             scroll_pos = item_count - visible_items;
+    }
         return D_REDRAWME;
 
     case MSG_KEY:
@@ -1563,11 +1766,14 @@ int d_slider_proc(int msg, DIALOG* d, int c) {
 
 // Enhanced file selection dialog that shows directories
 int file_select_ex(const char* title, char* path, const char* ext, int show_dirs) {
-    static char current_dir[256] = ".";
+    static char current_dir[512] = ".";
     static int selected_index = 0;
     static int scroll_pos = 0;
     static char** file_list = NULL;
     static int file_count = 0;
+
+    printf("DEBUG file_select_ex: title=%s, path=%s, ext=%s, show_dirs=%d\n",
+        title, path, ext, show_dirs);
 
     if (title) {
         printf("File select: %s\n", title);
@@ -1575,7 +1781,7 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
         printf("Extension: %s\n", ext);
 
         // Set initial directory from path
-        strncpy(current_dir, path, sizeof(current_dir) - 1);
+        safe_strncpy(current_dir, path, sizeof(current_dir) - 1);
         char* last_slash = strrchr(current_dir, '/');
         if (!last_slash) last_slash = strrchr(current_dir, '\\');
         if (last_slash) *last_slash = '\0'; // Remove filename, keep directory
@@ -1585,15 +1791,15 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
 
     // Build file list
     if (file_list) {
-        for (int i = 0; i < file_count; i++) free(file_list[i]);
-        free(file_list);
+        for (int i = 0; i < file_count; i++) SAFE_FREE(file_list[i]);
+        SAFE_FREE(file_list);
         file_list = NULL;
         file_count = 0;
     }
 
     // Count files and directories
     WIN32_FIND_DATAA find_data;
-    char search_pattern[256];
+    char search_pattern[512];
     sprintf(search_pattern, "%s\\*", current_dir);
 
     HANDLE hFind = FindFirstFileA(search_pattern, &find_data);
@@ -1629,7 +1835,7 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
     FindClose(hFind);
 
     // Allocate file list
-    file_list = (char**)malloc(file_count * sizeof(char*));
+    file_list = (char**)SAFE_MALLOC(file_count * sizeof(char*));
     if (!file_list) {
         printf("ERROR: Out of memory\n");
         return 0;
@@ -1648,20 +1854,26 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
 
         // If showing directories, include them
         if (show_dirs && is_dir) {
-            file_list[index] = (char*)malloc(strlen(name) + 4); // Space for [ ] and null terminator
+            file_list[index] = (char*)SAFE_MALLOC(strlen(name) + 4); // Space for [ ] and null terminator
             sprintf(file_list[index], "[%s]", name); // Mark directories with brackets
             index++;
         }
         // Include files with matching extension
         else if (!is_dir) {
             if (ext == NULL || *ext == '\0') {
-                file_list[index] = strdup(name);
+                file_list[index] = (char*)debug_malloc(strlen(name) + 1, __FILE__, __LINE__);
+                if (file_list[index]) {
+                    strcpy(file_list[index], name);
+                }
                 index++;
             }
             else {
                 char* file_ext = strrchr(name, '.');
                 if (file_ext && _stricmp(file_ext + 1, ext) == 0) {
-                    file_list[index] = strdup(name);
+                    file_list[index] = (char*)debug_malloc(strlen(name) + 1, __FILE__, __LINE__);
+                    if (file_list[index]) {
+                        strcpy(file_list[index], name);
+                    }
                     index++;
                 }
             }
@@ -1685,7 +1897,7 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
     // Simple input loop (in a real implementation, you'd use a proper GUI dialog)
     int done = 0;
     while (!done) {
-        if (kbhit()) {
+        if (_kbhit()) {
             int key = getch();
             switch (key) {
             case 72: // Up arrow
@@ -1701,14 +1913,14 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
                     // Check if it's a directory
                     if (selected[0] == '[' && selected[strlen(selected) - 1] == ']') {
                         // It's a directory - enter it
-                        char dir_name[256];
-                        strncpy(dir_name, selected + 1, strlen(selected) - 2);
+                        char dir_name[512];
+                        safe_strncpy(dir_name, selected + 1, strlen(selected) - 2);
                         dir_name[strlen(selected) - 2] = '\0';
 
                         // Change to subdirectory
-                        char new_dir[256];
+                        char new_dir[512];
                         sprintf(new_dir, "%s\\%s", current_dir, dir_name);
-                        strcpy(current_dir, new_dir);
+                        safe_strncpy(current_dir, new_dir, _TRUNCATE);
 
                         // Reset selection and restart
                         selected_index = 0;
@@ -1743,14 +1955,23 @@ int file_select_ex(const char* title, char* path, const char* ext, int show_dirs
     }
 
     // Cleanup
-    for (int i = 0; i < file_count; i++) free(file_list[i]);
-    free(file_list);
+    for (int i = 0; i < file_count; i++) SAFE_FREE(file_list[i]);
+    SAFE_FREE(file_list);
     file_list = NULL;
 
     return 1;
 }
 
 int file_select(const char* title, char* path, const char* ext) {
+    printf("DEBUG file_select: title='%s', initial path='%s', ext='%s'\n",
+        title, path, ext);
+
+    // Ensure path buffer is valid
+    if (path == NULL) {
+        printf("ERROR: file_select called with NULL path buffer\n");
+        return 0;
+    }
+
     // Simple file selector - in a real implementation, use native dialog
     printf("File select: %s\n", title);
     printf("Path: %s\n", path);
@@ -1799,18 +2020,33 @@ long file_size(const char* filename) {
     return (long)size;
 }
 
+// Safe version of get_filename
 char* get_filename(const char* path) {
+    if (!path) return "(null)";
+
     char* filename = strrchr(path, '/');
     if (!filename) filename = strrchr(path, '\\');
     return filename ? (filename + 1) : (char*)path;
 }
 
-void put_backslash(char* path) {
-    int len = strlen(path);
-    if (len > 0 && path[len - 1] != '/' && path[len - 1] != '\\') {
-        strcat(path, "/");
+void put_backslash(char* path, size_t path_size) {
+    if (!path || path_size == 0) return;
+
+    size_t len = strlen(path);
+
+    // Only add backslash if there's room and it's needed
+    if (len > 0 && len < path_size - 2) { // Leave room for slash and null terminator
+        char last_char = path[len - 1];
+        if (last_char != '/' && last_char != '\\') {
+            path[len] = '/';
+            path[len + 1] = '\0';
+        }
+    }
+    else if (len >= path_size - 2) {
+        printf("WARNING: put_backslash would overflow buffer (len=%zu, size=%zu)\n", len, path_size);
     }
 }
+
 
 // Simple BMP loader for 8-bit BMPs (stub - you can expand this)
 MYBITMAP* load_bmp(const char* filename, PALETTE pal) {
@@ -1818,10 +2054,10 @@ MYBITMAP* load_bmp(const char* filename, PALETTE pal) {
 
     // Try the same filename but with .pcx extension
     char pcx_filename[256];
-    strncpy(pcx_filename, filename, sizeof(pcx_filename) - 1);
+    safe_strncpy(pcx_filename, filename, sizeof(pcx_filename) - 1);
     char* dot = strrchr(pcx_filename, '.');
     if (dot) {
-        strcpy(dot, ".pcx");
+        safe_strncpy(dot, ".pcx", _TRUNCATE);
     }
     else {
         strcat(pcx_filename, ".pcx");
@@ -1917,7 +2153,7 @@ MYBITMAP* load_1bit_pcx(FILE* file, int width, int height, int bytes_per_line, i
     int plane_size = bytes_per_line * height;
 
     // Allocate buffer for plane data
-    unsigned char* plane_data = (unsigned char*)malloc(bytes_per_line);
+    unsigned char* plane_data = (unsigned char*)SAFE_MALLOC(bytes_per_line);
     if (!plane_data) {
         destroy_bitmap(bmp);
         return NULL;
@@ -1977,7 +2213,7 @@ MYBITMAP* load_1bit_pcx(FILE* file, int width, int height, int bytes_per_line, i
         }
     }
 
-    free(plane_data);
+    SAFE_FREE(plane_data);
 
     // Set up a default palette for 1-bit images
     if (color_planes == 1) {
@@ -2158,7 +2394,7 @@ void pop_config_state(void) {
     // Restore previous config state
     // For now, just clear the current config
     if (config_data) {
-        free(config_data);
+        SAFE_FREE(config_data);
         config_data = NULL;
     }
     current_config_file[0] = '\0';
@@ -2167,11 +2403,11 @@ void pop_config_state(void) {
 void set_config_file(const char* filename) {
     // Clear previous config
     if (config_data) {
-        free(config_data);
+        SAFE_FREE(config_data);
         config_data = NULL;
     }
 
-    strncpy(current_config_file, filename, sizeof(current_config_file) - 1);
+    safe_strncpy(current_config_file, filename, sizeof(current_config_file) - 1);
 
     // Load the file
     FILE* file = fopen(filename, "rb");
@@ -2186,7 +2422,7 @@ void set_config_file(const char* filename) {
     fseek(file, 0, SEEK_SET);
 
     // Allocate memory
-    config_data = malloc(config_size + 1);
+    config_data = SAFE_MALLOC(config_size + 1);
     if (!config_data) {
         fclose(file);
         return;
@@ -2269,7 +2505,7 @@ void set_config_string(const char* section, const char* name, const char* value)
         // Check for section
         if (trimmed_line[0] == '[' && trimmed_line[strlen(trimmed_line) - 1] == ']') {
             char section_name[64];
-            strncpy(section_name, trimmed_line + 1, strlen(trimmed_line) - 2);
+            safe_strncpy(section_name, trimmed_line + 1, strlen(trimmed_line) - 2);
             section_name[strlen(trimmed_line) - 2] = '\0';
             trim(section_name);
 
@@ -2340,8 +2576,8 @@ void set_config_string(const char* section, const char* name, const char* value)
     }
 
     // Replace the old config data
-    free(config_data);
-    config_data = strdup(new_config);
+    SAFE_FREE(config_data);
+    config_data = tracked_strdup(new_config, __FILE__, __LINE__);
     config_size = strlen(config_data);
 
     // Write to file
@@ -2365,16 +2601,30 @@ void set_config_int(const char* section, const char* name, int value) {
 }
 
 char* get_config_string(const char* section, const char* name, const char* default_value) {
+    printf("=== DEBUG get_config_string: Looking for [%s] %s ===\n", section, name);
+
     if (!config_data) {
-        printf("No config data loaded, returning default: %s\n", default_value);
-        return (char*)default_value;
+        printf("DEBUG: No config data loaded, returning default: %s\n", default_value);
+        if (default_value) {
+            char* result = (char*)debug_malloc(strlen(default_value) + 1, __FILE__, __LINE__);
+            if (result) {
+                strcpy(result, default_value);
+                return result;
+            }
+        }
+        return NULL;
     }
+
+    printf("DEBUG: Config data loaded, size: %zu\n", config_size);
+    printf("DEBUG: First 500 chars of config:\n%.500s\n", config_data);
 
     char* data = config_data;
     int in_target_section = 0;
     char line[256];
+    int line_number = 0;
 
     while (*data) {
+        line_number++;
         // Read line
         char* line_start = data;
         while (*data && *data != '\n' && *data != '\r') {
@@ -2393,9 +2643,11 @@ char* get_config_string(const char* section, const char* name, const char* defau
         }
 
         char* trimmed_line = trim(line);
+        printf("DEBUG: Line %d: '%s'\n", line_number, trimmed_line);
 
         // Skip empty lines and comments
         if (trimmed_line[0] == '\0' || trimmed_line[0] == ';' || trimmed_line[0] == '#') {
+            printf("DEBUG: Skipping empty/comment line\n");
             continue;
         }
 
@@ -2406,27 +2658,52 @@ char* get_config_string(const char* section, const char* name, const char* defau
             section_name[strlen(trimmed_line) - 2] = '\0';
             trim(section_name);
 
+            printf("DEBUG: Found section: '%s', comparing with target: '%s'\n",
+                section_name, section);
+
+            int was_in_section = in_target_section;
             in_target_section = (_stricmp(section_name, section) == 0);
+
+            printf("DEBUG: Section match: %d (was: %d)\n", in_target_section, was_in_section);
             continue;
         }
 
         // If we're in the target section, look for the key
         if (in_target_section) {
+            printf("DEBUG: In target section, looking for key: '%s'\n", name);
             char* equals = strchr(trimmed_line, '=');
             if (equals) {
                 *equals = '\0';
                 char* key = trim(trimmed_line);
                 char* value = trim(equals + 1);
 
-                // Use _stricmp instead of strcasecmp for Windows
+                printf("DEBUG: Found key-value: '%s' = '%s'\n", key, value);
+
                 if (_stricmp(key, name) == 0) {
-                    return _strdup(value); // Use _strdup for Windows
+                    printf("DEBUG: MATCH FOUND! Returning: '%s'\n", value);
+                    // Use debug_malloc instead of _strdup
+                    char* result = (char*)debug_malloc(strlen(value) + 1, __FILE__, __LINE__);
+                    if (result) {
+                        strcpy(result, value);
+                        return result;
+                    }
+                    return NULL;
                 }
             }
         }
     }
 
-    return (char*)default_value;
+    printf("DEBUG: [%s] %s not found, returning default: '%s'\n", section, name, default_value);
+    // Return tracked copy of default value
+    if (default_value) {
+        char* result = (char*)debug_malloc(strlen(default_value) + 1, __FILE__, __LINE__);
+        if (result) {
+            strcpy(result, default_value);
+            return result;
+        }
+    }
+
+    return NULL;
 }
 
 int get_config_int(const char* section, const char* name, int default_value) {
@@ -2444,7 +2721,7 @@ int get_config_int(const char* section, const char* name, int default_value) {
 
     // Only free if it was allocated by get_config_string (not the default)
     if (str_value != (char*)NULL && str_value != (char*)default_value) {
-        free(str_value);
+        SAFE_FREE(str_value);
     }
 
     return result;
@@ -2452,135 +2729,113 @@ int get_config_int(const char* section, const char* name, int default_value) {
 
 // Completely rewritten palette parser
 char** parse_palette_values(char* str_value, int* argc) {
-    // Make a working copy we can modify
-    char* work_str = strdup(str_value);
-    if (!work_str) {
-        *argc = 0;
-        return NULL;
-    }
+    printf("DEBUG parse_palette_values: '%s'\n", str_value);
 
-    // First pass: count how many values we have
-    int count = 0;
-    char* ptr = work_str;
-    int in_number = 0;
-
-    while (*ptr) {
-        if (*ptr == ',' || *ptr == ' ') {
-            if (in_number) {
-                count++;
-                in_number = 0;
-            }
-        }
-        else {
-            in_number = 1;
-        }
-        ptr++;
-    }
-    if (in_number) {
-        count++;
-    }
-
-    // Allocate result array
-    char** argv = (char**)malloc(count * sizeof(char*));
+    // Count how many values we have by splitting on spaces
+    int max_tokens = 50; // Reasonable maximum
+    char** argv = (char**)SAFE_MALLOC(max_tokens * sizeof(char*));
     if (!argv) {
-        free(work_str);
         *argc = 0;
         return NULL;
     }
 
-    // Second pass: extract values
     int index = 0;
-    ptr = work_str;
-    char* start = NULL;
+    char* ptr = str_value;
 
-    while (*ptr && index < count) {
-        if (*ptr != ',' && *ptr != ' ') {
-            if (!start) {
-                start = ptr; // Start of a new value
-            }
+    // Skip leading whitespace
+    while (*ptr == ' ' || *ptr == '\t') ptr++;
+
+    // Parse all values
+    while (*ptr && index < max_tokens - 1) {
+        char* start = ptr;
+
+        // Find the end of this value (whitespace or end of string)
+        while (*ptr && *ptr != ' ' && *ptr != '\t') {
+            ptr++;
         }
-        else {
-            if (start) {
-                // End of a value
-                int len = ptr - start;
-                argv[index] = (char*)malloc(len + 1);
-                strncpy(argv[index], start, len);
+
+        // Extract the value
+        if (start != ptr) {
+            int len = ptr - start;
+            argv[index] = (char*)debug_malloc(len + 1, __FILE__, __LINE__);
+            if (argv[index]) {
+                memcpy(argv[index], start, len);
                 argv[index][len] = '\0';
+                printf("  palette[%d] = '%s'\n", index, argv[index]);
                 index++;
-                start = NULL;
             }
         }
-        ptr++;
-    }
 
-    // Don't forget the last value
-    if (start && index < count) {
-        int len = ptr - start;
-        argv[index] = (char*)malloc(len + 1);
-        strncpy(argv[index], start, len);
-        argv[index][len] = '\0';
-        index++;
+        // Skip trailing whitespace
+        while (*ptr == ' ' || *ptr == '\t') ptr++;
     }
 
     *argc = index;
-    free(work_str);
+    printf("Palette parsed into %d values\n", index);
     return argv;
 }
 
 // Special parser for GraphicsRoms entries (format: "start length filename")
+// Fixed version of parse_graphics_roms
 char** parse_graphics_roms(char* str_value, int* argc) {
-    printf("Parsing GraphicsRoms entry: %s\n", str_value);
+    printf("DEBUG parse_graphics_roms: '%s'\n", str_value);
 
     // GraphicsRoms should have exactly 3 parts: start, length, filename
-    char** argv = (char**)malloc(3 * sizeof(char*));
+    char** argv = (char**)SAFE_MALLOC(3 * sizeof(char*));
     if (!argv) {
         *argc = 0;
         return NULL;
     }
 
+    // Initialize to NULL
+    argv[0] = argv[1] = argv[2] = NULL;
+
+    char* ptr = str_value;
     int index = 0;
-    char* start = str_value;
 
-    // Parse first token (start address)
-    while (*start == ' ') start++;
-    char* end = start;
-    while (*end && *end != ' ') end++;
-    if (start != end) {
-        int len = end - start;
-        argv[index] = (char*)malloc(len + 1);
-        strncpy(argv[index], start, len);
-        argv[index][len] = '\0';
-        argv[index] = trim(argv[index]);
-        index++;
-    }
+    // Skip leading whitespace
+    while (*ptr == ' ' || *ptr == '\t') ptr++;
 
-    // Parse second token (length)
-    start = end;
-    while (*start == ' ') start++;
-    end = start;
-    while (*end && *end != ' ') end++;
-    if (start != end) {
-        int len = end - start;
-        argv[index] = (char*)malloc(len + 1);
-        strncpy(argv[index], start, len);
-        argv[index][len] = '\0';
-        argv[index] = trim(argv[index]);
-        printf("  rom[%d] = '%s' (length)\n", index, argv[index]);
-        index++;
-    }
+    // Parse all three values
+    while (*ptr && index < 3) {
+        char* start = ptr;
 
-    // The rest is the filename (may contain spaces)
-    start = end;
-    while (*start == ' ') start++;
-    if (*start) {
-        argv[index] = strdup(start);
-        argv[index] = trim(argv[index]);
-        printf("  rom[%d] = '%s' (filename)\n", index, argv[index]);
-        index++;
+        // Find the end of this value (whitespace or end of string)
+        while (*ptr && *ptr != ' ' && *ptr != '\t') {
+            ptr++;
+        }
+
+        // Extract the value
+        if (start != ptr) {
+            int len = ptr - start;
+            argv[index] = (char*)debug_malloc(len + 1, __FILE__, __LINE__);
+            if (argv[index]) {
+                memcpy(argv[index], start, len);
+                argv[index][len] = '\0';
+                printf("  rom[%d] = '%s'\n", index, argv[index]);
+                index++;
+            }
+        }
+
+        // Skip trailing whitespace
+        while (*ptr == ' ' || *ptr == '\t') ptr++;
     }
 
     *argc = index;
     printf("GraphicsRoms parsed into %d parts\n", index);
+
+    // If we didn't get exactly 3 parts, it's an error
+    if (index != 3) {
+        printf("ERROR: GraphicsRoms entry should have exactly 3 parts, got %d\n", index);
+        // Free any allocated memory
+        for (int i = 0; i < index; i++) {
+            if (argv[i]) SAFE_FREE(argv[i]);
+        }
+        SAFE_FREE(argv);
+        *argc = 0;
+        return NULL;
+    }
+
     return argv;
 }
 
@@ -2597,7 +2852,7 @@ char** parse_default_values(char* str_value, int* argc) {
     }
 
     // Allocate array for tokens
-    char** argv = (char**)malloc(max_tokens * sizeof(char*));
+    char** argv = (char**)SAFE_MALLOC(max_tokens * sizeof(char*));
     if (!argv) {
         *argc = 0;
         return NULL;
@@ -2608,7 +2863,7 @@ char** parse_default_values(char* str_value, int* argc) {
     while (token != NULL && index < max_tokens) {
         char* trimmed = trim(token);
         if (strlen(trimmed) > 0) {
-            argv[index] = strdup(trimmed);
+            argv[index] = tracked_strdup(trimmed, __FILE__, __LINE__);
             printf("  default[%d] = '%s'\n", index, argv[index]);
             index++;
         }
@@ -2621,6 +2876,8 @@ char** parse_default_values(char* str_value, int* argc) {
 }
 
 char** get_config_argv(const char* section, const char* name, int* argc) {
+    printf("DEBUG get_config_argv: [%s] %s\n", section, name);
+
     if (!config_data) {
         *argc = 0;
         return NULL;
@@ -2629,10 +2886,12 @@ char** get_config_argv(const char* section, const char* name, int* argc) {
     // First get the string value
     char* str_value = get_config_string(section, name, NULL);
     if (str_value == NULL || str_value == (char*)NULL) {
-        printf("ERROR: Could not get config string\n");
+        printf("ERROR: Could not get config string for [%s] %s\n", section, name);
         *argc = 0;
         return NULL;
     }
+
+    printf("DEBUG: Raw config string: '%s'\n", str_value);
 
     // Special handling for different sections
     if (strcmp(section, "Palette") == 0) {
@@ -2966,3 +3225,5 @@ int readkey(void) {
     }
     return 0;
 }
+
+

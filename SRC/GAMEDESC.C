@@ -71,7 +71,7 @@ void InitialiseGameDesc(void)
    Orientation = 0;
    NumGfxRoms  = 0;
 
-   if(GfxBankExtraInfo) free(GfxBankExtraInfo);
+   if(GfxBankExtraInfo) SAFE_FREE(GfxBankExtraInfo);
    GfxBankExtraInfo = NULL;
 
    GameDescription[0] = '\0';

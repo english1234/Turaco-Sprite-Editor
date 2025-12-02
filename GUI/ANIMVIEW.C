@@ -52,11 +52,11 @@ double m(int gum)
 void animview_free_tables(struct _animview_internals *bi)
 {
     if (bi->banklist)
-	free(bi->banklist);
+	SAFE_FREE(bi->banklist);
     bi->banklist = NULL;
 
     if (bi->framelist)
-	free(bi->framelist);
+	SAFE_FREE(bi->framelist);
     bi->framelist = NULL;
 }
 
@@ -121,7 +121,7 @@ int animview_proc(int msg, DIALOG *d, int c)
 
     /* initialise when we get a start message */
     case MSG_START:
-	d->dp3 = malloc(sizeof(struct _animview_internals));
+	d->dp3 = SAFE_MALLOC(sizeof(struct _animview_internals));
 	bi = d->dp3;
 	bi->hilite = COLOR_LOLITE;
 	bi->A = -1;
@@ -136,7 +136,7 @@ int animview_proc(int msg, DIALOG *d, int c)
 	bi = d->dp3;
 	if(bi)
 	{
-	    free(bi);
+	    SAFE_FREE(bi);
 	    d->dp3 = NULL;
 	}
 	break;
@@ -164,14 +164,14 @@ int animview_proc(int msg, DIALOG *d, int c)
 
 	    d->d1 = animate_next_step( d->d1, range_low, range_high, bi );
 
-	    show_mouse(NULL);
+	    show_mouse(NULL, "animview_proc 1");
 	    broadcast_dialog_message (MSG_ANIM_POS_SET, d->d1);
-	    show_mouse(screen);
+	    show_mouse(screen, "animview_proc 2");
 	}
 
-	show_mouse(NULL);
+	show_mouse(NULL, "animview_proc 3");
 	SEND_MESSAGE(d, MSG_DRAW, 0);
-	show_mouse(screen);
+	show_mouse(screen, "animview_proc 4");
 	break; 
 
     /* draw in response to draw messages */

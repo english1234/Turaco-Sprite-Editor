@@ -31,7 +31,7 @@ void snap(MYBITMAP* bmp, RGB* pal)
     int done = 0;
 
     // Check if directory exists using Windows API
-    DWORD attrib = GetFileAttributes(SNAPDIR);
+    DWORD attrib = GetFileAttributes(TEXT(SNAPDIR));
     if (attrib == INVALID_FILE_ATTRIBUTES || !(attrib & FILE_ATTRIBUTE_DIRECTORY))
     {
         // Directory doesn't exist, create it

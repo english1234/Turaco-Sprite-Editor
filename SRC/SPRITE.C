@@ -28,10 +28,11 @@ extern MYBITMAP* create_bitmap(int width, int height);
 void set_Gfx_bank(int bank)
 {
     if (GfxBanks == NULL)        return;
-    if (bank     >= NumGfxBanks) return;   // bounds check
-    if (bank     <  0)           return;
+    if (bank >= NumGfxBanks) return;   // bounds check
+    if (bank < 0)           return;
 
     currentGfxBank = bank;
+    current_sprite_index = 0;  // ADD THIS - Reset to first sprite when switching banks
 
     sprite_bank = &GfxBanks[bank];
     GfxBanks[bank].flags |= SPRITE_FLAG_NEW; // set the flag
@@ -41,22 +42,21 @@ void set_Gfx_bank(int bank)
     GfxBanks[bank].n_rows = 0;
     GfxBanks[bank].last_selected = -1;
 
-
     // setup the bitmap editor window
     if (current_sprite)
     {
-	if (   (current_sprite->w != GfxBanks[bank].sprite_w)
-	    || (current_sprite->h != GfxBanks[bank].sprite_h) )
-	{
-	    destroy_bitmap(current_sprite);
-	    current_sprite = NULL;
-	}
+        if ((current_sprite->w != GfxBanks[bank].sprite_w)
+            || (current_sprite->h != GfxBanks[bank].sprite_h))
+        {
+            destroy_bitmap(current_sprite);
+            current_sprite = NULL;
+        }
     }
 
     if (current_sprite == NULL)
     {
-        current_sprite = create_bitmap( GfxBanks[bank].sprite_w, 
-					GfxBanks[bank].sprite_h);
+        current_sprite = create_bitmap(GfxBanks[bank].sprite_w,
+            GfxBanks[bank].sprite_h);
 
         clear_to_color(current_sprite, FIRST_USER_COLOR);
     }
@@ -165,26 +165,30 @@ int sprite_pal_home(DIALOG *d)
 }
 
 
-int sprite_return(DIALOG *d)
+int sprite_capture(DIALOG* d)
 {
     if (GameDriverLoaded == FALSE || GfxBanks == NULL)
-	return D_O_K;
+        return D_O_K;
 
-    if (GfxBanks[currentGfxBank].last_selected >= 0)
-	sprite_put(GfxBanks[currentGfxBank].last_selected, 
-               current_sprite, &GfxBanks[currentGfxBank]);
+    if (GfxBanks[currentGfxBank].last_selected >= 0) {
+        current_sprite_index = GfxBanks[currentGfxBank].last_selected; // ADD THIS
+        sprite_get(GfxBanks[currentGfxBank].last_selected,
+            current_sprite, &GfxBanks[currentGfxBank]);
+    }
 
     return D_REDRAW;
 }
 
-int sprite_capture(DIALOG *d)
+int sprite_return(DIALOG* d)
 {
     if (GameDriverLoaded == FALSE || GfxBanks == NULL)
-	return D_O_K;
+        return D_O_K;
 
-    if (GfxBanks[currentGfxBank].last_selected >= 0)
-	sprite_get(GfxBanks[currentGfxBank].last_selected, 
-               current_sprite, &GfxBanks[currentGfxBank]);
+    if (GfxBanks[currentGfxBank].last_selected >= 0) {
+        current_sprite_index = GfxBanks[currentGfxBank].last_selected; // ADD THIS
+        sprite_put(GfxBanks[currentGfxBank].last_selected,
+            current_sprite, &GfxBanks[currentGfxBank]);
+    }
 
     return D_REDRAW;
 }
@@ -268,31 +272,36 @@ int main_sprtplte_callback(DIALOG * d, int ic)
 
 #endif
 
-int main_sprtplte_callback(int msg, DIALOG * d, int ic)
+int main_sprtplte_callback(int msg, DIALOG* d, int ic)
 {
     static int last_mb;
-    struct sprite_palette **spmp;
-    struct sprite_palette *spm;
+    struct sprite_palette** spmp;
+    struct sprite_palette* spm;
 
     spmp = d->dp;
     spm = *spmp;
 
     spm->last_selected = ic;
-    if(msg == MSG_DCLICK)
-    {
-	if ((last_mb&3) == (mouse_b&3))
-	{
-	    // make sure it's the same mouse button for a double-click
+    current_sprite_index = ic;  // ADD THIS LINE - Update the global sprite index
 
-	    if (last_mb & 2) // right clicked
-		sprite_put(ic, current_sprite, spm); // right d-click -> replace
-	    else
-		sprite_get(ic, current_sprite, spm); // left d-click -> grab
-		
-	    return(D_REDRAW);
-	}
-    } else {
-	last_mb = mouse_b;
+    printf("DEBUG: Sprite selected - index: %d\n", current_sprite_index); // Optional debug
+
+    if (msg == MSG_DCLICK)
+    {
+        if ((last_mb & 3) == (mouse_b & 3))
+        {
+            // make sure it's the same mouse button for a double-click
+
+            if (last_mb & 2) // right clicked
+                sprite_put(ic, current_sprite, spm); // right d-click -> replace
+            else
+                sprite_get(ic, current_sprite, spm); // left d-click -> grab
+
+            return(D_REDRAW);
+        }
+    }
+    else {
+        last_mb = mouse_b;
     }
 
     return(D_O_K);

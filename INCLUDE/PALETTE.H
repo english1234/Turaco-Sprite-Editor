@@ -7,6 +7,18 @@
 
 #include "../INCLUDE/allegro.h"
 
+#define PALETTE_FRONT_GUARD 0xDEADBEEF
+#define PALETTE_REAR_GUARD  0xCAFEBABE
+
+#define PALETTE_ENTRY_COUNT 256
+// Memory guard structure for palette
+typedef struct guarded_palette {
+    unsigned long front_guard;
+    PALETTE_SELECT data;
+    RGB palette_entries[PALETTE_ENTRY_COUNT];
+    unsigned long rear_guard;
+} GUARDED_PALETTE;
+
 // do not use these.  To change or read fg & bg colors, use the functions.
 // don't read from these directly
 extern int pal_fg_color;

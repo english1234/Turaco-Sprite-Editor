@@ -40,6 +40,8 @@ typedef int BOOL;
 
 typedef int fixed;  // Fixed point number type
 
+#define MAX_ROM_SIZE 24576  // Example maximum size for debugging
+
 // File attribute constants (from DOS/Allegro)
 #define FA_RDONLY       1
 #define FA_HIDDEN       2
@@ -246,14 +248,43 @@ extern long life_counter;  // Counter for the "life" feature (possibly Conway's 
 #define GFX_AUTODETECT     1
 #define GFX_SAFE          -1
 
+void* debug_malloc(size_t size, const char* file, int line);
+void debug_free(void* ptr, const char* file, int line);
+void textprintf_ex(MYBITMAP* bmp, FONT* font, int x, int y, int color, int center, const char* format, ...);
+void initialize_default_sprite(void);
+void object_message(DIALOG* d, int msg, int c);
+void check_all_allocations(const char* checkpoint);
+void init_memory_debugging(void);
+void draw_sprite_ex(MYBITMAP* bmp, MYBITMAP* sprite, int x, int y, int flip_mode);
+void unload_driver(void);
+int show_dropdown_menu(MENU* menu, int x, int y);
+int alert(const char*, const char*, const char*, const char*, const char*, int, int);
+int do_dialog(DIALOG* dialog, int focus_obj);
 
+#define STRDUP(str) ({ \
+    char* _result = NULL; \
+    if (str) { \
+        _result = (char*)debug_malloc(strlen(str) + 1, __FILE__, __LINE__); \
+        if (_result) strcpy(_result, str); \
+    } \
+    _result; \
+})
+#define SAFE_MALLOC(size) debug_malloc(size, __FILE__, __LINE__)
+#define SAFE_FREE(p) do { \
+    if ((p) != NULL && (p) != (void*)(intptr_t)NULL) { \
+        debug_free((p), __FILE__, __LINE__); \
+        (p) = NULL; \
+    } \
+} while(0)
+
+char *safe_strncpy(char* dest, const char* src, size_t dest_size);
 
 extern int d_clear_proc(int msg, DIALOG* d, int c);
 extern int d_shadow_box_proc(int msg, DIALOG* d, int c);
 extern int d_ctext_proc(int msg, DIALOG* d, int c);
 extern int d_textbox_proc(int msg, DIALOG* d, int c);
 extern int d_button_proc(int msg, DIALOG* d, int c);
-extern void show_mouse(MYBITMAP* bmp);
+extern void show_mouse(MYBITMAP* bmp, const char *caller);
 extern void text_mode(int mode);
 extern void textout_centre(MYBITMAP* bmp, FONT* font, const char* text, int x, int y, int color);
 extern void stretch_blit(MYBITMAP* src, MYBITMAP* dst,
@@ -308,7 +339,7 @@ extern int exists(const char* filename);
 extern int file_select(const char* title, char* path, const char* ext);
 extern long file_size(const char* filename);
 extern char* get_filename(const char* path);
-extern void put_backslash(char* path);
+extern void put_backslash(char* path, size_t path_size);
 
 // Bitmap functions
 extern MYBITMAP* load_bitmap(const char* filename, PALETTE pal);

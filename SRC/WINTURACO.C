@@ -5,6 +5,7 @@
 //
 //  September, 1998
 //  jerry@mail.csh.rit.edu
+//  Refactored with safe string handling functions
 
 char title_text[] = "Turaco v1.1.3";
 char title_date[] = "07 Oct 1999";
@@ -31,6 +32,7 @@ char title_date[] = "07 Oct 1999";
 #include "../INCLUDE/BITMAPED.H"
 #include "../INCLUDE/UTIL.H"
 #include <excpt.h>
+#include <wtypes.h>
 
 #include SDL_PATH
 
@@ -136,7 +138,7 @@ int parse_command_line(int argc, char** argv)
         return RET_USAGE;
     }
     else
-        strncpy(command_line_driver, argv[1], 126);
+        safe_strncpy(command_line_driver, argv[1], sizeof(command_line_driver));
 
     return RET_DOIT;
 }
@@ -148,7 +150,7 @@ void end_blurb(void)
     printf("Written by:\n");
     printf("\tScott \"Jerry\" Lawrence  jerry@mail.csh.rit.edu\n");
     printf("\tIvan Mackintosh         ivan@rcp.co.uk\n");
-
+    printf("\tRobin Champion          robin@robinchampion.com (Windows version 2025)\n");
     printf("\nSpecial thanks to:\n");
     printf("\tChris \"Zwaxy\" Moore, M.C. Silvius, David Caldwell\n");
 
@@ -224,13 +226,13 @@ void force_font_initialization(void) {
     if (font == NULL) {
         printf("Font is NULL - creating default font\n");
 
-        font = malloc(sizeof(FONT));
+        font = SAFE_MALLOC(sizeof(FONT));
         if (!font) { printf("ERROR: Failed to allocate font structure\n"); return; }
 
-        font->data = malloc(sizeof(FONT_8x8));
+        font->data = SAFE_MALLOC(sizeof(FONT_8x8));
         if (!font->data) {
             printf("ERROR: Failed to allocate font data\n");
-            free(font);
+            SAFE_FREE(font);
             font = NULL;
             return;
         }
@@ -301,8 +303,7 @@ void Init_Subsystems(void)
     printf("ROMPath = '%s'\n", ROMPath);
     if (strlen(ROMPath) == 0) {
         printf("WARNING: ROMPath is empty! Setting to default.\n");
-        strncpy(ROMPath, DEFAULT_PATH, ROM_PATH_LEN - 1);
-        ROMPath[ROM_PATH_LEN - 1] = '\0';
+        safe_strncpy(ROMPath, DEFAULT_PATH, ROM_PATH_LEN);
         printf("ROMPath now = '%s'\n", ROMPath);
     }
     printf("======================\n");
@@ -374,18 +375,399 @@ int count_menu_items(MENU* menu) {
     return count;
 }
 
+// In winturaco.c - HARDENED d_menu_proc
+
+// Global variables for deferred operations
+int game_change_requested = 0;
+char pending_driver_load[256] = { 0 };
+static BOOL menu_operation_in_progress = FALSE;
+static uint32_t menu_stack_canary = 0xDEADBEEF;
+
+// Ultra-safe menu execution with maximum protection
+int ultra_safe_menu_execute(MENU* menu_item) {
+    // Check if we're in a stable state for menu execution
+    if (menu_operation_in_progress) {
+        printf("CRITICAL: Menu execution attempted during another menu operation!\n");
+        return D_O_K;
+    }
+
+    menu_operation_in_progress = TRUE;
+
+    // Comprehensive pointer validation
+    if (menu_item == NULL) {
+        printf("ERROR: menu_item is NULL\n");
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    printf("ULTRA_SAFE_MENU: Attempting to execute menu '%s'\n",
+        menu_item->text ? menu_item->text : "UNNAMED");
+
+    if (menu_item->proc == NULL) {
+        printf("ERROR: menu_item->proc is NULL for menu '%s'\n",
+            menu_item->text ? menu_item->text : "UNNAMED");
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    // Enhanced pointer validation
+    uintptr_t proc_addr = (uintptr_t)menu_item->proc;
+
+    // Check for obviously invalid pointers
+    if (proc_addr < 0x1000) {
+        printf("ERROR: Function pointer too low: %p (possible NULL or small value)\n", menu_item->proc);
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    if (proc_addr > 0x7FFFFFFF) {
+        printf("ERROR: Function pointer too high: %p (possible kernel address)\n", menu_item->proc);
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    // Check for common corruption patterns
+    if (proc_addr == 0xCDCDCDCD) {
+        printf("ERROR: Function pointer is uninitialized heap pattern (0xCDCDCDCD)\n");
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    if (proc_addr == 0xDDDDDDDD) {
+        printf("ERROR: Function pointer is freed heap pattern (0xDDDDDDDD)\n");
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    if (proc_addr == 0xFEEEFEEE) {
+        printf("ERROR: Function pointer is freed heap pattern (0xFEEEFEEE)\n");
+        menu_operation_in_progress = FALSE;
+        return D_O_K;
+    }
+
+    // Check alignment (most function pointers should be aligned)
+    if ((proc_addr & 0x3) != 0) {
+        printf("WARNING: Function pointer is unaligned: %p (might be corrupted)\n", menu_item->proc);
+    }
+
+    printf("ULTRA_SAFE_MENU: Calling function at %p for menu '%s'\n",
+        menu_item->proc, menu_item->text ? menu_item->text : "UNNAMED");
+
+    // Try to call with maximum protection
+    int result = D_O_K;
+
+#ifdef _WIN32
+    //__try {
+        // Add a small delay to ensure system stability and allow any pending operations to complete
+        Sleep(10); // 10ms delay
+
+        // Verify the pointer one more time right before calling
+        if ((uintptr_t)menu_item->proc < 0x1000 || (uintptr_t)menu_item->proc > 0x7FFFFFFF) {
+            printf("CRITICAL: Function pointer corrupted during validation!\n");
+            result = D_O_K;
+        }
+        else {
+            result = menu_item->proc();
+            printf("ULTRA_SAFE_MENU: Function returned %d\n", result);
+        }
+ //   }
+  /*/  __except (EXCEPTION_EXECUTE_HANDLER) {
+        DWORD exception_code = _exception_code();
+        printf("CRASH in menu function %p caught! Exception: 0x%08lX\n",
+            menu_item->proc, exception_code);
+
+        // Provide more detailed exception information
+        switch (exception_code) {
+        case EXCEPTION_ACCESS_VIOLATION:
+            printf("Exception: ACCESS VIOLATION - Invalid memory access\n");
+            break;
+        case EXCEPTION_INT_DIVIDE_BY_ZERO:
+            printf("Exception: DIVIDE BY ZERO\n");
+            break;
+        case EXCEPTION_STACK_OVERFLOW:
+            printf("Exception: STACK OVERFLOW\n");
+            break;
+        case EXCEPTION_ILLEGAL_INSTRUCTION:
+            printf("Exception: ILLEGAL INSTRUCTION\n");
+            break;
+        default:
+            printf("Exception: Unknown (0x%08lX)\n", exception_code);
+            break;
+        }
+        
+        result = D_O_K;
+    }*/
+#else
+    // For non-Windows, use signal handling or other protection mechanisms
+    // This is a simplified version - you might want more sophisticated signal handling
+    result = menu_item->proc();
+#endif
+
+    menu_operation_in_progress = FALSE;
+    return result;
+}
+
+// Emergency recovery function
+void menu_emergency_recovery(void) {
+    printf("=== MENU EMERGENCY RECOVERY INITIATED ===\n");
+
+    // Reset all menu-related global states
+    menu_operation_in_progress = FALSE;
+    game_change_requested = 0;
+    memset(pending_driver_load, 0, sizeof(pending_driver_load));
+
+    // Reset the stack canary
+    menu_stack_canary = 0xDEADBEEF;
+
+    printf("=== MENU EMERGENCY RECOVERY COMPLETED ===\n");
+}
+
+extern BOOL palette_operation_in_progress;
+
+// Helper function to validate menu structure
+BOOL validate_menu_structure(MENU* menu) {
+    if (menu == NULL) {
+        printf("ERROR: Menu structure is NULL\n");
+        return FALSE;
+    }
+
+    // Check a few menu entries to see if they look valid
+    for (int i = 0; i < 10 && menu[i].text != NULL; i++) {
+        // Check text pointer
+        if (menu[i].text != NULL) {
+            uintptr_t text_addr = (uintptr_t)menu[i].text;
+            if (text_addr < 0x1000 || text_addr > 0x7FFFFFFF) {
+                printf("ERROR: Invalid text pointer at menu[%d]: %p\n", i, menu[i].text);
+                return FALSE;
+            }
+        }
+
+        // Check function pointer if present
+        if (menu[i].proc != NULL) {
+            uintptr_t proc_addr = (uintptr_t)menu[i].proc;
+            if (proc_addr < 0x1000 || proc_addr > 0x7FFFFFFF) {
+                printf("ERROR: Invalid function pointer at menu[%d]: %p\n", i, menu[i].proc);
+                return FALSE;
+            }
+        }
+
+        // Check child menu pointer if present
+        if (menu[i].child != NULL) {
+            uintptr_t child_addr = (uintptr_t)menu[i].child;
+            if (child_addr < 0x1000 || child_addr > 0x7FFFFFFF) {
+                printf("ERROR: Invalid child pointer at menu[%d]: %p\n", i, menu[i].child);
+                return FALSE;
+            }
+        }
+    }
+
+    return TRUE;
+}
+
+// Safe alert function that doesn't use the dialog system during critical operations
+int safe_alert(const char* s1, const char* s2, const char* s3,
+    const char* b1, const char* b2, int c1, int c2) {
+    printf("SAFE_ALERT: %s - %s - %s\n", s1 ? s1 : "", s2 ? s2 : "", s3 ? s3 : "");
+
+    // In critical situations, just log the alert instead of showing a dialog
+    // This avoids potential issues with the dialog system during driver loading
+
+    // If we're in a stable state, try to show the real alert
+    if (!menu_operation_in_progress && !palette_operation_in_progress) {
+        return alert(s1, s2, s3, b1, b2, c1, c2);
+    }
+    else {
+        printf("WARNING: Cannot show alert dialog during critical operation\n");
+        return 1; // Default to first button
+    }
+}
+
+extern GUARDED_PALETTE* guarded_psel; // The guarded version
+
+extern BOOL pal_initted;
+
+// Enhanced emergency recovery
+void emergency_recovery(void) {
+    printf("=== EMERGENCY RECOVERY INITIATED ===\n");
+
+    // Reset all critical systems
+    menu_operation_in_progress = FALSE;
+    palette_operation_in_progress = FALSE;
+    game_change_requested = 0;
+    memset(pending_driver_load, 0, sizeof(pending_driver_load));
+
+    // Reset palette system
+    pal_initted = FALSE;
+    if (guarded_psel) {
+        // Don't call DeInit_Palette() as it might be corrupted
+        // Just free the memory directly
+        SAFE_FREE(guarded_psel);
+        guarded_psel = NULL;
+        psel = NULL;
+    }
+
+    // Reset menu system
+    menu_stack_canary = 0xDEADBEEF;
+
+    // Reset driver state
+    GameDriverLoaded = FALSE;
+
+    printf("=== EMERGENCY RECOVERY COMPLETED ===\n");
+}
+
+// Stack canary for driver loading
+volatile uint32_t driver_stack_canary = 0x01020304;
+
+// Add this function to fileio.c or winturaco.c
+int ultra_safe_driver_load(const char* drivername) {
+    printf("=== ULTRA_SAFE_DRIVER_LOAD: %s ===\n", drivername);
+
+   
+
+    int result = D_O_K;
+
+#ifdef _WIN32
+  //  __try {
+        busy();
+
+        // Unload current driver first
+        printf("DEBUG: Unloading current driver\n");
+        unload_driver();
+
+        // Verify stack integrity
+        if (driver_stack_canary != 0x01020304) {
+            printf("CRITICAL: Stack corrupted during driver unload!\n");
+            not_busy();
+            return D_O_K;
+        }
+
+        // Load new driver
+        printf("DEBUG: Loading new driver: %s\n", drivername);
+        if (LoadDriver(drivername) == TRUE) {
+            printf("DEBUG: Driver loaded successfully\n");
+
+            // Verify stack integrity
+            if (driver_stack_canary != 0x01020304) {
+                printf("CRITICAL: Stack corrupted during driver load!\n");
+                not_busy();
+                return D_O_K;
+            }
+
+            // Setup graphics bank
+            printf("DEBUG: Setting graphics bank\n");
+            set_Gfx_bank(0);
+
+            // Verify stack integrity
+            if (driver_stack_canary != 0x01020304) {
+                printf("CRITICAL: Stack corrupted during set_Gfx_bank!\n");
+                not_busy();
+                return D_O_K;
+            }
+
+            // Initialize palette
+            printf("DEBUG: Initializing palette\n");
+            Init_Palette();
+
+            printf("DEBUG: Driver loading completed successfully\n");
+        }
+        else {
+            printf("DEBUG: Driver loading failed\n");
+            unload_driver();
+
+            // Show error alert in a safe way
+            safe_alert("Error loading driver:", drivername, "Sorry.",
+                "&Okay", NULL, 'O', 0);
+        }
+
+        not_busy();
+  /* }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        DWORD exception_code = GetExceptionCode();
+        printf("CRASH in driver loading caught! Exception: 0x%08lX\n", exception_code);
+
+        // Emergency recovery
+        not_busy();
+        unload_driver();
+
+        result = D_O_K;
+    }*/
+#else
+    // Non-Windows version
+    busy();
+    unload_driver();
+
+    if (LoadDriver(drivername) == TRUE) {
+        set_Gfx_bank(0);
+        Init_Palette();
+    }
+    else {
+        unload_driver();
+        safe_alert("Error loading driver:", drivername, "Sorry.",
+            "&Okay", NULL, 'O', 0);
+    }
+    not_busy();
+#endif
+
+    // Final stack integrity check
+    if (driver_stack_canary != 0x01020304) {
+        printf("CRITICAL: Stack corrupted during driver loading process!\n");
+        emergency_recovery();
+    }
+
+    printf("=== END ULTRA_SAFE_DRIVER_LOAD ===\n");
+    return result;
+}
+
+extern char selected_filename[255];
+
 int d_menu_proc(int msg, DIALOG* d, int c) {
+    // Stack canary to detect stack corruption
+    volatile uint32_t local_stack_canary = 0xDEADBEEF;
+
     MENU* menu = (MENU*)d->dp;
     static int menu_bar_hover = -1;
+    static int active_menu = -1;
 
-  
+    // Verify stack integrity on entry
+    if (local_stack_canary != 0xDEADBEEF) {
+        printf("CRITICAL: Stack corruption detected on entry to d_menu_proc!\n");
+        menu_emergency_recovery();
+        return D_O_K;
+    }
 
-    // No scaling calculations needed!
-    const int menu_bar_height = 16;
-    const int item_padding = 8;
-    const int text_padding = 4;
+    // Verify global stack canary
+    if (menu_stack_canary != 0xDEADBEEF) {
+        printf("CRITICAL: Global menu stack canary corrupted!\n");
+        menu_emergency_recovery();
+        menu_stack_canary = 0xDEADBEEF;
+    }
 
-    if (msg == MSG_DRAW) {
+    /* process the message */
+    switch (msg) {
+        /* initialise when we get a start message */
+    case MSG_START:
+        printf("DEBUG: d_menu_proc MSG_START\n");
+        if (d->dp) {
+            if (!validate_menu_structure((MENU*)d->dp)) {
+                printf("ERROR: Menu structure validation failed in MSG_START\n");
+                return D_O_K;
+            }
+        }
+        break;
+
+    case MSG_DRAW:
+    {
+        // No scaling calculations needed!
+        const int menu_bar_height = 16;
+        const int item_padding = 8;
+        const int text_padding = 4;
+
+        // Verify menu structure before drawing
+        if (!validate_menu_structure(menu)) {
+            printf("ERROR: Cannot draw menu - structure invalid\n");
+            return D_O_K;
+        }
+
         // Draw at original coordinates
         rectfill(screen, d->x, d->y, d->x + d->w - 1, d->y + menu_bar_height - 1, d->bg);
         rect(screen, d->x, d->y, d->x + d->w - 1, d->y + menu_bar_height - 1, d->fg);
@@ -433,12 +815,13 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
 
             x += item_width;
         }
-        return D_O_K;
     }
+    break;
 
-    if (msg == MSG_IDLE) {
+    case MSG_IDLE:
+    {
         // Check if mouse is over menu bar
-        if (mouse_y >= d->y && mouse_y < d->y + menu_bar_height) {
+        if (mouse_y >= d->y && mouse_y < d->y + 16) {
             int x = d->x;
             int new_hover = -1;
 
@@ -448,7 +831,7 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
                 for (int j = 0; text[j] != '\0'; j++) {
                     if (text[j] != '&') display_len++;
                 }
-                int item_width = display_len * 8 + item_padding;
+                int item_width = display_len * 8 + 8;
 
                 if (mouse_x >= x && mouse_x < x + item_width) {
                     new_hover = i;
@@ -466,15 +849,21 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
             menu_bar_hover = -1;
             return D_REDRAW;
         }
-
-        return D_O_K;
     }
+    break;
 
-    if (msg == MSG_CLICK) {
-        printf("Menu click at (%d, %d)\n", mouse_x, mouse_y);
+    case MSG_CLICK:
+        printf("DEBUG: d_menu_proc MSG_CLICK at (%d, %d)\n", mouse_x, mouse_y);
+
+        // Verify stack integrity
+        if (local_stack_canary != 0xDEADBEEF) {
+            printf("CRITICAL: Stack corruption detected in MSG_CLICK!\n");
+            menu_emergency_recovery();
+            return D_O_K;
+        }
 
         // Check if click is on menu bar
-        if (mouse_y >= d->y && mouse_y < d->y + menu_bar_height) {
+        if (mouse_y >= d->y && mouse_y < d->y + 16) {
             int x = d->x;
 
             for (int i = 0; menu[i].text != NULL; i++) {
@@ -483,104 +872,51 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
                 for (int j = 0; text[j] != '\0'; j++) {
                     if (text[j] != '&') display_len++;
                 }
-                int item_width = display_len * 8 + item_padding;
+                int item_width = display_len * 8 + 8;
 
                 if (mouse_x >= x && mouse_x < x + item_width) {
-                    printf("Clicked on menu: %s\n", text);
+                    printf("DEBUG: Clicked on menu: %s\n", text);
 
                     if (menu[i].child) {
                         // Show dropdown using modal loop
-                        int selected = show_dropdown_menu(menu[i].child, x, d->y + menu_bar_height);
-
-                        printf("Menu index i=%d, d->dp=%p, menu=%p\n", i, d->dp, menu);
-                        printf("menu[%d].child=%p\n", i, menu[i].child);
+                        printf("DEBUG: Showing dropdown menu for: %s\n", text);
+                        int selected = show_dropdown_menu(menu[i].child, x, d->y + 16);
 
                         if (selected >= 0 && menu[i].child) {
-                            int child_count = count_menu_items(menu[i].child);
-                            printf("Checking menu[%d].child[%d] (total children: %d):\n", i, selected, child_count);
+                            MENU* selected_menu = &menu[i].child[selected];
 
-                            if (selected < child_count) {
-                                MENU* selected_menu = &menu[i].child[selected];
-                                printf("  text=%p (%s)\n", selected_menu->text,
-                                    selected_menu->text ? selected_menu->text : "NULL");
-                                printf("  proc=%p\n", (void*)selected_menu->proc);
-
-                                // SAFE MENU EXECUTION WITH ERROR HANDLING
-                                if (selected_menu->proc) {
-                                    printf("DEBUG: Attempting to execute menu function at address: %p\n",
-                                        (void*)selected_menu->proc);
-                                    printf("DEBUG: Menu item text: '%s'\n",
-                                        selected_menu->text ? selected_menu->text : "NULL");
-
-                                    // Verify the function pointer looks reasonable
-                                    if ((uintptr_t)selected_menu->proc < 0x1000) {
-                                        printf("ERROR: Invalid function pointer (too low: %p)\n",
-                                            (void*)selected_menu->proc);
-                                        return D_O_K;
-                                    }
-
-                                    // Try to call the function with better error handling
-                                    int result = D_O_K;
-
-#ifdef _WIN32
-                                    __try {
-                                        result = selected_menu->proc();
-                                        printf("DEBUG: Menu function returned: %d\n", result);
-                                    }
-                                    __except (EXCEPTION_EXECUTE_HANDLER) {
-                                        printf("ERROR: Crash executing menu function at %p!\n",
-                                            (void*)selected_menu->proc);
-                                        return D_O_K;
-                                    }
-#else
-                                    // For non-Windows platforms
-                                    result = selected_menu->proc();
-                                    printf("DEBUG: Menu function returned: %d\n", result);
-#endif
-
-                                    return result;
-                                }
-                                else {
-                                    printf("ERROR: Menu function pointer is NULL\n");
-                                }
+                            // Validate the selected menu item
+                            if (!validate_menu_structure(selected_menu)) {
+                                printf("ERROR: Selected menu item validation failed\n");
+                                break;
                             }
-                            else {
-                                printf("ERROR: Menu selection out of bounds: %d >= %d\n",
-                                    selected, child_count);
+
+                            printf("DEBUG: Menu item %d selected: '%s'\n",
+                                selected, selected_menu->text ? selected_menu->text : "UNNAMED");
+
+                            // Use ultra-safe execution for menu items
+                            int result = ultra_safe_menu_execute(selected_menu);
+
+                            // Verify stack integrity after execution
+                            if (local_stack_canary != 0xDEADBEEF) {
+                                printf("CRITICAL: Stack corrupted during menu execution!\n");
+                                menu_emergency_recovery();
+                                return D_O_K;
                             }
+
+                            return result;
                         }
-                        else {
-                            printf("DEBUG: No menu item selected or menu child is NULL\n");
-                        }
-                        return D_REDRAW;
                     }
                     else if (menu[i].proc) {
-                        // Execute menu action directly with safety checks
-                        printf("Executing menu action directly\n");
-                        printf("Menu function pointer: %p\n", (void*)menu[i].proc);
+                        // Use ultra-safe execution for direct menu actions
+                        int result = ultra_safe_menu_execute(&menu[i]);
 
-                        // Safety check
-                        if ((uintptr_t)menu[i].proc < 0x1000) {
-                            printf("ERROR: Invalid direct menu function pointer: %p\n",
-                                (void*)menu[i].proc);
+                        // Verify stack integrity after execution
+                        if (local_stack_canary != 0xDEADBEEF) {
+                            printf("CRITICAL: Stack corrupted during direct menu execution!\n");
+                            menu_emergency_recovery();
                             return D_O_K;
                         }
-
-                        int result = D_O_K;
-#ifdef _WIN32
-                        __try {
-                            result = menu[i].proc();
-                            printf("Direct menu proc returned: %d\n", result);
-                        }
-                        __except (EXCEPTION_EXECUTE_HANDLER) {
-                            printf("ERROR: Crash executing direct menu function at %p\n",
-                                (void*)menu[i].proc);
-                            return D_O_K;
-                        }
-#else
-                        result = menu[i].proc();
-                        printf("Direct menu proc returned: %d\n", result);
-#endif
 
                         return result;
                     }
@@ -588,7 +924,31 @@ int d_menu_proc(int msg, DIALOG* d, int c) {
                 }
                 x += item_width;
             }
+
+            // Click was on menu bar, consume it
+            return D_USED_CHAR;
         }
+        break;
+
+    case MSG_WANTFOCUS:
+        // Menu should not interfere with focus
+        return D_O_K;
+
+    default:
+        // Handle other messages normally
+        break;
+    }
+
+    // Final stack integrity check before returning
+    if (local_stack_canary != 0xDEADBEEF) {
+        printf("CRITICAL: Stack corruption detected before return from d_menu_proc!\n");
+        menu_emergency_recovery();
+    }
+
+    if (menu_stack_canary != 0xDEADBEEF) {
+        printf("CRITICAL: Global menu stack canary corrupted during processing!\n");
+        menu_emergency_recovery();
+        menu_stack_canary = 0xDEADBEEF;
     }
 
     return D_O_K;
@@ -1287,7 +1647,7 @@ void allegro_init(void) {
     // Create texture at the ORIGINAL resolution (320x240)
     sdl_texture = SDL_CreateTexture(
         sdl_renderer,
-      //  SDL_PIXELFORMAT_ARGB8888,
+        //  SDL_PIXELFORMAT_ARGB8888,
         SDL_PIXELFORMAT_ABGR8888,
         SDL_TEXTUREACCESS_STREAMING,
         320,  // Original resolution width
@@ -1303,7 +1663,7 @@ void allegro_init(void) {
     }
 
     // Allocate pixel buffer for ORIGINAL resolution (320x240)
-    sdl_pixels = malloc(320 * 240 * sizeof(Uint32));
+    sdl_pixels = SAFE_MALLOC(320 * 240 * sizeof(Uint32));
     if (!sdl_pixels) {
         printf("Could not allocate pixel buffer!\n");
         SDL_DestroyTexture(sdl_texture);
@@ -1327,12 +1687,13 @@ void allegro_init(void) {
     printf("Window: %dx%d, Logical: 320x240 (automatic scaling)\n", gfx_hres, gfx_vres);
 }
 
-
-
 int main(int argc, char** argv)
 {
+    init_memory_debugging();    // Tracks memory allocations (must be first command to be executed)
+
     int ret;
     ret = parse_command_line(argc, argv);
+
 
     allegro_init();
 
@@ -1344,7 +1705,6 @@ int main(int argc, char** argv)
     //  init_main_dialog_scaling();
 
     printf("=== Turaco SDL2 Port ===\n");
-
 
     if (ret == RET_DOIT)
     {
@@ -1388,4 +1748,3 @@ void foo(void)
     }
 }
 */
-

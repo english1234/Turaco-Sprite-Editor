@@ -6,6 +6,7 @@
 //  jerry@mail.csh.rit.edu
 
 #include <stdio.h>
+#include <string.h>
 #include "../INCLUDE/ALLEGRO.H"
 #include "../INCLUDE/general.h" // for the color definitions
 #include "../INCLUDE/util.h"
@@ -91,8 +92,6 @@ void box_3d(MYBITMAP * bmp,
     line(bmp, 2, h-2, w-2, h-2, ca);
     line(bmp, w-2, 2, w-2, h-2, ca);
 
-//    rect(bmp, 1, 1, w-2, h-2, (selected)?COLOR_HILITE:COLOR_LOLITE);
-
     if (selected)
     {
 	rect(bmp, 0, 0,  w-1, h-1, GUI_BACK);
@@ -113,8 +112,10 @@ int get_config_on_off(const char* section, const char* name, int default_value) 
         else if (_stricmp(str_value, "off") == 0) {
             result = 0;
         }
-        // If it's neither "on" nor "off", keep the default
-        free(str_value);
+        // Only free if it was allocated by get_config_string
+        if (str_value != (char*)NULL) {
+            SAFE_FREE(str_value);
+        }
     }
 
     return result;

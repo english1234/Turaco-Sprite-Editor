@@ -42,14 +42,14 @@ void display_text_file(char* title, char* filename, int startpos)
 	if (exists(filename))
 	{
 		if (text_file_buffer) {
-			free(text_file_buffer);
+			SAFE_FREE(text_file_buffer);
 			text_file_buffer = NULL;  // Prevent double-free
 		}
 
 		//sprintf(text_file_dialog[1].dp, title);
 		text_file_dialog[1].dp = title;
 
-		text_file_buffer = (char*)malloc(file_size(filename));
+		text_file_buffer = (char*)SAFE_MALLOC(file_size(filename));
 		if (text_file_buffer)
 		{
 			fp = fopen(filename, "rb");
@@ -65,7 +65,7 @@ void display_text_file(char* title, char* filename, int startpos)
 				do_dialog(text_file_dialog, 2);
 
 				if (text_file_buffer) {
-					free(text_file_buffer);
+					SAFE_FREE(text_file_buffer);
 					text_file_buffer = NULL;  // Prevent double-free
 				}
 			}
