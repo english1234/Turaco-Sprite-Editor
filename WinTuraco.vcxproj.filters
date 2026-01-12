@@ -15,104 +15,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GUI\ANIMVIEW.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\BITMAPED.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\BMPDISP.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\BUTTON.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\DRIVSEL.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\GUIPAL.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\SPRTPLTE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI\UTIL.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MAPED\PACMAN.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\AGE_MAP.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\ANIMATE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\CODING.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\CONFIG.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\DLG.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\EDITMENU.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\EDITMODE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\FILEIO.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\FONT.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\GAMEDESC.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\HELP.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\ILOAD.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\INIDRIV.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\LIFE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\LIST.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\WINTURACO.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\MAPED.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\PALETTE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\SNAP.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\SPRITE.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\TEXTED.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\TOOLMENU.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SRC\ALLEGRO.C">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="INCLUDE\ALLEGRO.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="INCLUDE\ANIMATE.H">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -129,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="INCLUDE\CONFIG.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="INCLUDE\dlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="INCLUDE\DRIVSEL.H">
@@ -191,16 +107,100 @@
     <ClInclude Include="INCLUDE\UTIL.H">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="INCLUDE\ALLEGRO.H">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib">
-      <Filter>Resource Files</Filter>
-    </Library>
-    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib">
-      <Filter>Resource Files</Filter>
-    </Library>
+    <ClCompile Include="GUI\ANIMVIEW.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BITMAPED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BMPDISP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\BUTTON.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\DRIVSEL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\GUIPAL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\SPRTPLTE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\UTIL.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\AGE_MAP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ALLEGRO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ANIMATE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\CODING.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\CONFIG.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\DLG.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\EDITMENU.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\EDITMODE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\FILEIO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\FONT.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\GAMEDESC.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\HELP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\ILOAD.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\INIDRIV.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\LIFE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\LIST.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\MAPED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\PALETTE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\SNAP.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\SPRITE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\TEXTED.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\TOOLMENU.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SRC\WINTURACO.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

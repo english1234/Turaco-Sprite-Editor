@@ -212,11 +212,11 @@ static void debug_rom_loading(void) {
     printf("Number of ROMs: %d\n", NumGfxRoms);
 
     for (int i = 0; i < NumGfxRoms; i++) {
-        printf("ROM %d:\n", i + 1);
-        printf("  Load Address: 0x%lX\n", GfxRoms[i].LoadAddress);
-        printf("  Size: %ld bytes\n", GfxRoms[i].Size);
-        printf("  Alternate: %s\n", GfxRoms[i].Alternate ? "YES" : "NO");
-        printf("  ROM Name: '%s'\n", GfxRoms[i].ROMName);
+        printf("ROM %d: ", i + 1);
+        printf("  Load Address: 0x%lX ", GfxRoms[i].LoadAddress);
+        printf("  Size: %ld bytes ", GfxRoms[i].Size);
+        printf("  Alternate: %s ", GfxRoms[i].Alternate ? "YES" : "NO");
+        printf("  ROM Name: '%s' ", GfxRoms[i].ROMName);
 
         // Check if file exists
         if (exists(GfxRoms[i].ROMName)) {
@@ -1085,6 +1085,69 @@ void debug_graphics_decoding(void) {
     printf("=== END GRAPHICS DECODING DEBUG ===\n\n");
 }
 
+// In inidriv.c or coding.c
+void ValidateINIParameters(void) {
+    printf("\n=== INI PARAMETER VALIDATION ===\n");
+
+    for (int bank = 0; bank < NumGfxBanks; bank++) {
+        GFXBANKEXTRA* gbe = &GfxBankExtraInfo[bank];
+        SPRITE_PALETTE* sp = &GfxBanks[bank];
+
+        long expected_size = CalculateExpectedSpriteSize(sp->sprite_w, sp->sprite_h, gbe->planes);
+
+        printf("Bank %d:\n", bank);
+        printf("  Dimensions: %dx%d, Planes: %d\n", sp->sprite_w, sp->sprite_h, gbe->planes);
+        printf("  Expected bytes per sprite: %ld\n", expected_size);
+        printf("  Configured charincrement: %d\n", gbe->charincrement);
+
+        if (gbe->charincrement != expected_size) {
+            printf("  WARNING: charincrement mismatch!\n");
+
+            // Common multiples to check
+            if (gbe->charincrement == expected_size * 2) {
+                printf("  NOTE: charincrement is 2x expected size (common for interleaved ROMs)\n");
+            }
+            else if (gbe->charincrement == expected_size * 4) {
+                printf("  NOTE: charincrement is 4x expected size (check ROM interleaving)\n");
+            }
+            else {
+                printf("  SUGGESTION: Consider changing charincrement to %ld in INI file\n", expected_size);
+            }
+        }
+
+        // Check if bank fits in available ROM data
+        long max_rom_address = 0;
+        for (int i = 0; i < NumGfxRoms; i++) {
+            long rom_end = GfxRoms[i].LoadAddress + GfxRoms[i].Size;
+            if (rom_end > max_rom_address) {
+                max_rom_address = rom_end;
+            }
+        }
+
+        long bank_data_needed = gbe->charincrement * sp->n_total;
+        long bank_end = gbe->startaddress + bank_data_needed;
+
+        printf("  Bank data range: 0x%lX to 0x%lX\n", gbe->startaddress, bank_end);
+        printf("  Available ROM data: 0x0 to 0x%lX\n", max_rom_address);
+
+        if (bank_end > max_rom_address) {
+            long overflow = bank_end - max_rom_address;
+            printf("  ERROR: Bank requires %ld bytes beyond available ROM data!\n", overflow);
+
+            // Calculate how many sprites would fit
+            int max_sprites = 0;
+            if (gbe->charincrement > 0) {
+                max_sprites = (max_rom_address - gbe->startaddress) / gbe->charincrement;
+            }
+            printf("  SUGGESTION: Reduce total sprites to %d or check charincrement\n", max_sprites);
+        }
+
+        printf("\n");
+    }
+
+    printf("=== END INI VALIDATION ===\n\n");
+}
+
 BOOL LoadDriver(const char* INIFileName)
 {
     BOOL retval;
@@ -1178,6 +1241,9 @@ BOOL LoadDriver(const char* INIFileName)
     SwitchGraphicsBank(-1, 0);
 
     printf("DEBUG: Driver loaded successfully\n");
+
+    // Validate INI parameters after loading
+    ValidateINIParameters();
 
     return retval;
 }

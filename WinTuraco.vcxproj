@@ -139,38 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GUI\ANIMVIEW.C" />
-    <ClCompile Include="GUI\BITMAPED.C" />
-    <ClCompile Include="GUI\BMPDISP.C" />
-    <ClCompile Include="GUI\BUTTON.C" />
-    <ClCompile Include="GUI\DRIVSEL.C" />
-    <ClCompile Include="GUI\GUIPAL.C" />
-    <ClCompile Include="GUI\SPRTPLTE.C" />
-    <ClCompile Include="GUI\UTIL.C" />
-    <ClCompile Include="MAPED\PACMAN.C" />
-    <ClCompile Include="SRC\AGE_MAP.C" />
-    <ClCompile Include="SRC\ALLEGRO.C" />
-    <ClCompile Include="SRC\ANIMATE.C" />
-    <ClCompile Include="SRC\CODING.C" />
-    <ClCompile Include="SRC\CONFIG.C" />
-    <ClCompile Include="SRC\DLG.C" />
-    <ClCompile Include="SRC\EDITMENU.C" />
-    <ClCompile Include="SRC\EDITMODE.C" />
-    <ClCompile Include="SRC\FILEIO.C" />
-    <ClCompile Include="SRC\FONT.C" />
-    <ClCompile Include="SRC\GAMEDESC.C" />
-    <ClCompile Include="SRC\HELP.C" />
-    <ClCompile Include="SRC\ILOAD.C" />
-    <ClCompile Include="SRC\INIDRIV.C" />
-    <ClCompile Include="SRC\LIFE.C" />
-    <ClCompile Include="SRC\LIST.C" />
-    <ClCompile Include="SRC\WINTURACO.C" />
-    <ClCompile Include="SRC\MAPED.C" />
-    <ClCompile Include="SRC\PALETTE.C" />
-    <ClCompile Include="SRC\SNAP.C" />
-    <ClCompile Include="SRC\SPRITE.C" />
-    <ClCompile Include="SRC\TEXTED.C" />
-    <ClCompile Include="SRC\TOOLMENU.C" />
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib" />
+    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="INCLUDE\ALLEGRO.H" />
@@ -180,6 +150,7 @@
     <ClInclude Include="INCLUDE\BMPDISP.H" />
     <ClInclude Include="INCLUDE\CODING.H" />
     <ClInclude Include="INCLUDE\CONFIG.H" />
+    <ClInclude Include="INCLUDE\dlg.h" />
     <ClInclude Include="INCLUDE\DRIVSEL.H" />
     <ClInclude Include="INCLUDE\EDITMENU.H" />
     <ClInclude Include="INCLUDE\EDITMODE.H" />
@@ -202,8 +173,37 @@
     <ClInclude Include="INCLUDE\UTIL.H" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2.lib" />
-    <Library Include="..\..\SDL2\VisualC\Win32\Release\SDL2main.lib" />
+    <ClCompile Include="GUI\ANIMVIEW.C" />
+    <ClCompile Include="GUI\BITMAPED.C" />
+    <ClCompile Include="GUI\BMPDISP.C" />
+    <ClCompile Include="GUI\BUTTON.C" />
+    <ClCompile Include="GUI\DRIVSEL.C" />
+    <ClCompile Include="GUI\GUIPAL.C" />
+    <ClCompile Include="GUI\SPRTPLTE.C" />
+    <ClCompile Include="GUI\UTIL.C" />
+    <ClCompile Include="SRC\AGE_MAP.C" />
+    <ClCompile Include="SRC\ALLEGRO.C" />
+    <ClCompile Include="SRC\ANIMATE.C" />
+    <ClCompile Include="SRC\CODING.C" />
+    <ClCompile Include="SRC\CONFIG.C" />
+    <ClCompile Include="SRC\DLG.C" />
+    <ClCompile Include="SRC\EDITMENU.C" />
+    <ClCompile Include="SRC\EDITMODE.C" />
+    <ClCompile Include="SRC\FILEIO.C" />
+    <ClCompile Include="SRC\FONT.C" />
+    <ClCompile Include="SRC\GAMEDESC.C" />
+    <ClCompile Include="SRC\HELP.C" />
+    <ClCompile Include="SRC\ILOAD.C" />
+    <ClCompile Include="SRC\INIDRIV.C" />
+    <ClCompile Include="SRC\LIFE.C" />
+    <ClCompile Include="SRC\LIST.C" />
+    <ClCompile Include="SRC\MAPED.C" />
+    <ClCompile Include="SRC\PALETTE.C" />
+    <ClCompile Include="SRC\SNAP.C" />
+    <ClCompile Include="SRC\SPRITE.C" />
+    <ClCompile Include="SRC\TEXTED.C" />
+    <ClCompile Include="SRC\TOOLMENU.C" />
+    <ClCompile Include="SRC\WINTURACO.C" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

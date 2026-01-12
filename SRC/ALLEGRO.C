@@ -2615,8 +2615,8 @@ char* get_config_string(const char* section, const char* name, const char* defau
         return NULL;
     }
 
-    printf("DEBUG: Config data loaded, size: %zu\n", config_size);
-    printf("DEBUG: First 500 chars of config:\n%.500s\n", config_data);
+  //  printf("DEBUG: Config data loaded, size: %zu\n", config_size);
+  //  printf("DEBUG: First 500 chars of config:\n%.500s\n", config_data);
 
     char* data = config_data;
     int in_target_section = 0;
@@ -2643,11 +2643,11 @@ char* get_config_string(const char* section, const char* name, const char* defau
         }
 
         char* trimmed_line = trim(line);
-        printf("DEBUG: Line %d: '%s'\n", line_number, trimmed_line);
+    //    printf("DEBUG: Line %d: '%s'\n", line_number, trimmed_line);
 
         // Skip empty lines and comments
         if (trimmed_line[0] == '\0' || trimmed_line[0] == ';' || trimmed_line[0] == '#') {
-            printf("DEBUG: Skipping empty/comment line\n");
+           // printf("DEBUG: Skipping empty/comment line\n");
             continue;
         }
 
@@ -2658,26 +2658,26 @@ char* get_config_string(const char* section, const char* name, const char* defau
             section_name[strlen(trimmed_line) - 2] = '\0';
             trim(section_name);
 
-            printf("DEBUG: Found section: '%s', comparing with target: '%s'\n",
-                section_name, section);
+         //   printf("DEBUG: Found section: '%s', comparing with target: '%s'\n",
+         //       section_name, section);
 
             int was_in_section = in_target_section;
             in_target_section = (_stricmp(section_name, section) == 0);
 
-            printf("DEBUG: Section match: %d (was: %d)\n", in_target_section, was_in_section);
+         //   printf("DEBUG: Section match: %d (was: %d)\n", in_target_section, was_in_section);
             continue;
         }
 
         // If we're in the target section, look for the key
         if (in_target_section) {
-            printf("DEBUG: In target section, looking for key: '%s'\n", name);
+          //  printf("DEBUG: In target section, looking for key: '%s'\n", name);
             char* equals = strchr(trimmed_line, '=');
             if (equals) {
                 *equals = '\0';
                 char* key = trim(trimmed_line);
                 char* value = trim(equals + 1);
 
-                printf("DEBUG: Found key-value: '%s' = '%s'\n", key, value);
+              //  printf("DEBUG: Found key-value: '%s' = '%s'\n", key, value);
 
                 if (_stricmp(key, name) == 0) {
                     printf("DEBUG: MATCH FOUND! Returning: '%s'\n", value);
