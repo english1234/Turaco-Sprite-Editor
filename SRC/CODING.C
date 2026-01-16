@@ -52,7 +52,7 @@ int GetBit(long startbit) {
 void Decode_Normal(int CurrentBank) {
     GFXBANKEXTRA* gbe = &GfxBankExtraInfo[CurrentBank];
     SPRITE_PALETTE* sp = &GfxBanks[CurrentBank];
-    int x, y, spriteno, plane;
+    long x, y, spriteno, plane;
     long offs1;
     BYTE result = 0;
     long StartBit = gbe->startaddress * 8;
@@ -195,6 +195,12 @@ void Decode_Normal(int CurrentBank) {
 
         // now copy it to the appropriate place in the master gfxbank bitmap
         int dest_x = spriteno * sp->sprite_w;
+
+        if (dest_x + sp->sprite_w > sp->bmp->w) {
+            printf("ERROR: Attempting to write beyond bitmap bounds in Decode_Normal!\n");
+            continue; // Skip this sprite
+        }
+
         if (dest_x >= 0 && dest_x < (sp->n_total * sp->sprite_w)) {
             blit(tbmp, sp->bmp, 0, 0, dest_x,
                 0, sp->sprite_w, sp->sprite_h);

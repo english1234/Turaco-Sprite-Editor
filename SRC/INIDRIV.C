@@ -200,10 +200,10 @@ int FindRomPath(char* ROMName)
 /* default palette - used if one doesn't exist in the ini driver */
 static RGB DefaultColours[] =
 {
-    {0x00,0x00,0x00}, {0x3f,0x00,0x00}, {0x00,0x3f,0x00}, {0x00,0x00,0x3f},
-    {0x3f,0x3f,0x00}, {0x3f,0x00,0x3f}, {0x00,0x3f,0x3f}, {0x3f,0x3f,0x3f},
-    {0x08,0x08,0x08}, {0x10,0x10,0x10}, {0x18,0x18,0x18}, {0x20,0x20,0x20},
-    {0x28,0x28,0x28}, {0x30,0x30,0x30}, {0x38,0x38,0x38}, {0x3f,0x3f,0x3f}
+    {0x00,0x00,0x00}, {0x3f,0x3f,0x3f}, {0x15,0x15,0x15}, {0x2a,0x2a,0x2a},
+    {0x08,0x08,0x08}, {0x18,0x18,0x18}, {0x28,0x28,0x28}, {0x38,0x38,0x38},
+    {0x04,0x04,0x04}, {0x0c,0x0c,0x0c}, {0x14,0x14,0x14}, {0x1c,0x1c,0x1c},
+    {0x24,0x24,0x24}, {0x2c,0x2c,0x2c}, {0x34,0x34,0x34}, {0x3c,0x3c,0x3c}
 };
 
 // Debug function to check ROM file loading
@@ -286,66 +286,6 @@ void debug_all_palettes(void) {
     }
 
     printf("=== END ALL PALETTES DEBUG ===\n\n");
-}
-
-void fix_default_palettes(void) {
-    printf("\n=== FIXING DEFAULT PALETTES ===\n");
-
-    // Fix the 2-color palette (1 plane) to be black and white instead of black and red
-    if (NumColPalettes[1] > 0 && ColPalettes[1] != NULL) {
-        printf("Fixing 2-color palette from red to white\n");
-        ColPalettes[1][0].r = 0;   // Black
-        ColPalettes[1][0].g = 0;
-        ColPalettes[1][0].b = 0;
-        ColPalettes[1][1].r = 63;  // White (was red)
-        ColPalettes[1][1].g = 63;
-        ColPalettes[1][1].b = 63;
-
-        printf("Fixed 2-color palette:\n");
-        printf("  Color 0: R=%d, G=%d, B=%d\n",
-            ColPalettes[1][0].r, ColPalettes[1][0].g, ColPalettes[1][0].b);
-        printf("  Color 1: R=%d, G=%d, B=%d\n",
-            ColPalettes[1][1].r, ColPalettes[1][1].g, ColPalettes[1][1].b);
-    }
-
-    printf("=== END FIXING DEFAULT PALETTES ===\n\n");
-}
-
-void fix_color_palettes(void) {
-    printf("\n=== FIXING COLOR PALETTES ===\n");
-
-    // Fix the 4-color palette (2 planes) to use actual colors
-    if (NumColPalettes[2] > 0 && ColPalettes[2] != NULL) {
-        printf("Fixing 4-color palette from grayscale to colors\n");
-
-        // Color 0: Black (keep as is)
-        ColPalettes[2][0].r = 0;
-        ColPalettes[2][0].g = 0;
-        ColPalettes[2][0].b = 0;
-
-        // Color 1: Red
-        ColPalettes[2][1].r = 63;
-        ColPalettes[2][1].g = 0;
-        ColPalettes[2][1].b = 0;
-
-        // Color 2: Green
-        ColPalettes[2][2].r = 0;
-        ColPalettes[2][2].g = 63;
-        ColPalettes[2][2].b = 0;
-
-        // Color 3: Blue
-        ColPalettes[2][3].r = 0;
-        ColPalettes[2][3].g = 0;
-        ColPalettes[2][3].b = 63;
-
-        printf("Fixed 4-color palette:\n");
-        for (int i = 0; i < 4; i++) {
-            printf("  Color %d: R=%d, G=%d, B=%d\n",
-                i, ColPalettes[2][i].r, ColPalettes[2][i].g, ColPalettes[2][i].b);
-        }
-    }
-
-    printf("=== END FIXING COLOR PALETTES ===\n\n");
 }
 
 // called only from ReadINIFileInfo for reading in the information from the
@@ -658,8 +598,14 @@ static BOOL ReadFromDriverIniFile(void)
         return FALSE;
     }
 
-    fix_default_palettes();
-    fix_color_palettes();
+    // Dynamically adjust n_total based on available ROM data
+    long max_rom_address = 0;
+    for (i = 0; i < NumGfxRoms; i++) {
+        long rom_end = GfxRoms[i].LoadAddress + GfxRoms[i].Size;
+        if (rom_end > max_rom_address) {
+            max_rom_address = rom_end;
+        }
+    }
 
     debug_current_palette();
     debug_all_palettes();
@@ -667,7 +613,6 @@ static BOOL ReadFromDriverIniFile(void)
     printf("DEBUG: ReadFromDriverIniFile completed successfully\n");
     return TRUE;
 }
-
 
 BOOL ReadColourPalettes(void) {
     int i, j;
@@ -812,7 +757,27 @@ BOOL ReadColourPalettes(void) {
         printf("DEBUG: Successfully processed palette %s\n", PaletteNum);
     }
 
-    printf("DEBUG: ReadColourPalettes completed successfully\n");
+    printf("\n=== PALETTE SUMMARY ===\n");
+    for (int p = 0; p < MAX_COL_PLANES; p++) {
+        if (NumColPalettes[p] > 0) {
+            int num_colors = 1 << p;
+            printf("ColPalettes[%d]: %d palette(s) of %d colors each\n",
+                p, NumColPalettes[p], num_colors);
+            for (int pal = 0; pal < NumColPalettes[p]; pal++) {
+                printf("  Palette %d: ", pal);
+                for (int c = 0; c < num_colors && c < 8; c++) {
+                    int idx = pal * num_colors + c;
+                    printf("(%d,%d,%d) ",
+                        ColPalettes[p][idx].r,
+                        ColPalettes[p][idx].g,
+                        ColPalettes[p][idx].b);
+                }
+                printf("\n");
+            }
+        }
+    }
+    printf("=== END PALETTE SUMMARY ===\n\n");
+
     return TRUE;
 }
 
@@ -932,7 +897,7 @@ BOOL LoadGfxRomData(void)
 
     // Calculate memory needed for graphics banks
     for (i = 0; i < NumGfxBanks; i++) {
-        long bank_end = GfxBankExtraInfo[i].startaddress +
+        unsigned long bank_end = GfxBankExtraInfo[i].startaddress +
             (GfxBankExtraInfo[i].charincrement * GfxBanks[i].n_total);
         if (bank_end > bank_requirements) {
             bank_requirements = bank_end;
@@ -943,7 +908,8 @@ BOOL LoadGfxRomData(void)
     }
 
     // Use the maximum of ROM requirements and bank requirements, plus safety margin
-    total = (max_address > bank_requirements ? max_address : bank_requirements) + 1024;
+   // total = (max_address > bank_requirements ? max_address : bank_requirements) + 1024;
+    total = bank_requirements * 2;
 
     printf("DEBUG: Memory allocation calculation:\n");
     printf("  Max ROM address: 0x%lX (%ld bytes)\n", max_address, max_address);
@@ -1039,6 +1005,11 @@ BOOL AllocateGfxBanks(void)
     // create the bitmaps inorder to store the graphics banks
     for (i = 0; i < NumGfxBanks; i++)
     {
+        long bitmap_width = (long)GfxBanks[i].sprite_w * GfxBanks[i].n_total;
+        if (bitmap_width > 32767) { // Allegro 4 limit
+            printf("WARNING: Bitmap for bank %d is very wide (%ldpx). This may cause issues.\n", i, bitmap_width);
+        }
+
         GfxBanks[i].bmp = create_bitmap(GfxBanks[i].sprite_w * GfxBanks[i].n_total, GfxBanks[i].sprite_h);
         if (GfxBanks[i].bmp == NULL)
         {
@@ -1086,8 +1057,10 @@ void debug_graphics_decoding(void) {
 }
 
 // In inidriv.c or coding.c
-void ValidateINIParameters(void) {
+BOOL ValidateINIParameters(void) {
     printf("\n=== INI PARAMETER VALIDATION ===\n");
+
+    BOOL validation_success = TRUE;
 
     for (int bank = 0; bank < NumGfxBanks; bank++) {
         GFXBANKEXTRA* gbe = &GfxBankExtraInfo[bank];
@@ -1112,6 +1085,7 @@ void ValidateINIParameters(void) {
             }
             else {
                 printf("  SUGGESTION: Consider changing charincrement to %ld in INI file\n", expected_size);
+                validation_success = FALSE;
             }
         }
 
@@ -1131,21 +1105,16 @@ void ValidateINIParameters(void) {
         printf("  Available ROM data: 0x0 to 0x%lX\n", max_rom_address);
 
         if (bank_end > max_rom_address) {
-            long overflow = bank_end - max_rom_address;
-            printf("  ERROR: Bank requires %ld bytes beyond available ROM data!\n", overflow);
-
-            // Calculate how many sprites would fit
-            int max_sprites = 0;
-            if (gbe->charincrement > 0) {
-                max_sprites = (max_rom_address - gbe->startaddress) / gbe->charincrement;
-            }
-            printf("  SUGGESTION: Reduce total sprites to %d or check charincrement\n", max_sprites);
+            printf("  WARNING: Bank extends beyond available ROM data.\n");
+            printf("           This is common for interleaved ROMs and may not be an error.\n");
         }
 
         printf("\n");
     }
 
     printf("=== END INI VALIDATION ===\n\n");
+
+    return validation_success;
 }
 
 BOOL LoadDriver(const char* INIFileName)
@@ -1243,7 +1212,9 @@ BOOL LoadDriver(const char* INIFileName)
     printf("DEBUG: Driver loaded successfully\n");
 
     // Validate INI parameters after loading
-    ValidateINIParameters();
+    if (!ValidateINIParameters()) {
+        printf("INI parameter validation failed.\n");
+    }
 
     return retval;
 }

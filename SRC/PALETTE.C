@@ -265,11 +265,24 @@ void install_palette(int pal_no) // installs the selected palette number
     int planes = GfxBankExtraInfo[currentGfxBank].planes;
     int num_colors = 1 << planes;  // 2^planes = number of colors
 
+    // Find out how many banks have the same number of planes as the current one,
+    // and come before it.
+        int banks_before_with_same_planes = 0;
+    for (int i = 0; i < currentGfxBank; i++) {
+        if (GfxBankExtraInfo[i].planes == planes) {
+            banks_before_with_same_planes++;
+        }
+    }
+
     // Calculate the correct palette index based on number of colors
     int palette_index = planes;
     while ((1 << palette_index) < num_colors && palette_index < MAX_COL_PLANES - 1) {
         palette_index++;
     }
+
+    // The palette number to use is the number of banks before this one
+    // that have the same number of planes.
+    pal_no = banks_before_with_same_planes;
 
     printf("DEBUG: Planes=%d, Colors=%d, PaletteIndex=%d\n", planes, num_colors, palette_index);
 
